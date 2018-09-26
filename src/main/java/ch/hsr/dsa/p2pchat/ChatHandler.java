@@ -14,9 +14,10 @@ public interface ChatHandler {
     Observable<FriendRequest> receivedFriendRequest();
 
     void sendMessage(User toUser, String message);
+    void sendGroupMessage(Group group, String message);
     void sendFriendRequest(String username);
-
     void createGroup(String name);
-    void inviteToGroup(User toUser);
+    void inviteToGroup(Group group, User toUser);
     void leaveGroup(Group group);
+
 }

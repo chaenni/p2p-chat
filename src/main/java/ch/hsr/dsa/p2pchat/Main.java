@@ -12,52 +12,7 @@ import net.tomp2p.utils.Pair;
 public class Main {
 
     public static void main(String args[]) throws ExecutionException, InterruptedException {
-        var chat = new ChatCLI(new ChatHandler() {
-            @Override
-            public Observable<ChatMessage> chatMessages() {
-                return null;
-            }
-
-            @Override
-            public Observable<User> friendCameOnline() {
-                return null;
-            }
-
-            @Override
-            public Observable<Pair<User, Group>> userLeftGroup() {
-                return null;
-            }
-
-            @Override
-            public Observable<FriendRequest> receivedFriendRequest() {
-                return null;
-            }
-
-            @Override
-            public void sendMessage(User toUser, String message) {
-
-            }
-
-            @Override
-            public void sendFriendRequest(String username) {
-
-            }
-
-            @Override
-            public void createGroup(String name) {
-
-            }
-
-            @Override
-            public void inviteToGroup(User toUser) {
-
-            }
-
-            @Override
-            public void leaveGroup(Group group) {
-
-            }
-        });
+        var chat = new ChatCLI(null);
         var done = chat.start();
         done.get();
     }

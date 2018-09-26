@@ -1,8 +1,8 @@
 package ch.hsr.dsa.p2pchat.cli.commands;
 
-import java.util.Map;
+import ch.hsr.dsa.p2pchat.ChatHandler;
 
 public interface Command {
     String getName();
-    void run(String commandInput);
+    void run(ChatHandler handler, String commandInput);
 }
