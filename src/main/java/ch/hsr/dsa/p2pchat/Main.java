@@ -3,7 +3,7 @@ package ch.hsr.dsa.p2pchat;
 import ch.hsr.dsa.p2pchat.cli.ChatCLI;
 import ch.hsr.dsa.p2pchat.cli.Command;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
-import java.time.LocalDateTime;
+import ch.hsr.dsa.p2pchat.model.User;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
@@ -22,9 +22,9 @@ public class Main {
             }
         }));
         var done = chat.start();
-        chat.displayMessage(new ChatMessage("Hans", "Hello", LocalDateTime.now()));
-        chat.displayMessage(new ChatMessage("Peter", "Hi", LocalDateTime.now()));
-        chat.displayMessage(new ChatMessage("Emma", "Hello", LocalDateTime.now()));
+        chat.displayMessage(new ChatMessage(new User("Hans"), "Hello"));
+        chat.displayMessage(new ChatMessage(new User("Peter"), "Hi"));
+        chat.displayMessage(new ChatMessage(new User("Emma"), "Hello"));
         done.get();
     }
 }

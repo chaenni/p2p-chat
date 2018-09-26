@@ -3,6 +3,7 @@ package ch.hsr.dsa.p2pchat.cli;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.AnsiColor;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.ColorPrinter;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
+import ch.hsr.dsa.p2pchat.model.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -19,7 +20,7 @@ public class ChatCLI {
     }
 
     public void displayMessage(ChatMessage message) {
-        ColorPrinter.printInColor(AnsiColor.RED, message.getFromUsername() + ", " + message.getTime().format(
+        ColorPrinter.printInColor(AnsiColor.RED, message.getFromUser().getName() + ", " + LocalDateTime.now().format(
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + ": ");
         System.out.println(message.getMessage());
     }
@@ -34,7 +35,7 @@ public class ChatCLI {
                         .findFirst()
                         .ifPresent(Command::run);
                 } else {
-                    displayMessage(new ChatMessage("User", nextEntry, LocalDateTime.now()));
+                    displayMessage(new ChatMessage(new User("User"), nextEntry));
                 }
             }
         });
