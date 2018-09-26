@@ -132,9 +132,9 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void sendFriendRequest(String username) {
+    public void sendFriendRequest(User user) {
         var friendRequestMessage = new FriendRequest(ownUser);
-        peer.send(Number160.createHash(username)).object(friendRequestMessage).start();
+        peer.send(Number160.createHash(user.getName())).object(friendRequestMessage).start();
     }
 
     @Override
@@ -150,6 +150,16 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void leaveGroup(Group group) {
         //TODO implement
+    }
+
+    @Override
+    public void acceptFriendRequest(User user) {
+
+    }
+
+    @Override
+    public void rejectFriendRequest(User user) {
+
     }
 
     public PeerAddress getPeerAddress() {
