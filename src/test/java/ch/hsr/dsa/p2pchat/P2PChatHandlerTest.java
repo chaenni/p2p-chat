@@ -1,8 +1,6 @@
 package ch.hsr.dsa.p2pchat;
 
-import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.User;
-import io.reactivex.observers.TestObserver;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +11,7 @@ public class P2PChatHandlerTest {
         var peter = P2PChatHandler.start( "Peter", 4000);
         var hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", 4001);
 
-        var testObserver = new TestObserver<ChatMessage>();
-        hans.chatMessages().subscribe(testObserver);
+        var testObserver = hans.chatMessages().test();
 
         peter.sendMessage(new User("Hans"), "Sali Hans");
 
