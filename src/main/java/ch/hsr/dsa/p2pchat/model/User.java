@@ -12,4 +12,11 @@ public class User implements Serializable {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "name='" + name + '\'' +
+            '}';
+    }
 }
