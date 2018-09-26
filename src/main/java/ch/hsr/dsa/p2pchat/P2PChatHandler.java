@@ -25,22 +25,6 @@ public class P2PChatHandler implements ChatHandler {
     private Observable<FriendRequest> receivedFriendRequest;
     private User ownUser;
 
-    public static void main(String[] args) throws Exception {
-        var peter = P2PChatHandler.start( "Peter", 4000);
-        var hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", 4001);
-
-        peter.chatMessages.subscribe(message -> {
-            System.out.println("Peter received message from " + message.getFromUser().getName() + ": " + message.getMessage());
-        });
-
-        hans.chatMessages.subscribe(message -> {
-            System.out.println("Hans received message from " + message.getFromUser().getName() + ": " + message.getMessage());
-        });
-
-        peter.sendMessage(new User("Hans"), "Sali Hans");
-        hans.sendMessage(new User("Peter"), "Sali Peter");
-    }
-
     public static P2PChatHandler start( String username, int port) throws IOException {
         return start(null, username, port);
     }
