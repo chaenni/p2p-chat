@@ -1,12 +1,17 @@
 package ch.hsr.dsa.p2pchat.cli;
 
+import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.AnsiColor;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.ColorPrinter;
+import ch.hsr.dsa.p2pchat.cli.commands.Command;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
@@ -15,8 +20,8 @@ public class ChatCLI {
     private Collection<Command> commands;
     private Future<?> scannerTask;
 
-    public ChatCLI(Collection<Command> commands) {
-        this.commands = commands;
+    public ChatCLI(ChatHandler handler) {
+        this.commands = new ArrayList<>();
     }
 
     public void displayMessage(ChatMessage message) {
@@ -31,15 +36,20 @@ public class ChatCLI {
             while (scanner.hasNext()) {
                 String nextEntry = scanner.next();
                 if (nextEntry.charAt(0) == '/') {
-                    commands.stream().filter(command -> command.matches(nextEntry))
-                        .findFirst()
-                        .ifPresent(Command::run);
+                    handleCommandInput(nextEntry);
                 } else {
                     displayMessage(new ChatMessage(new User("User"), nextEntry));
                 }
             }
         });
         return scannerTask;
+    }
+
+    private void handleCommandInput(String commandInput) {
+        var commandName = commandInput.substring(1, commandInput.indexOf("/"));
+        commands.stream().filter(command -> command.getName().equals(commandName))
+            .findFirst()
+            .ifPresent(c -> c.run(commandInput));
     }
 
     public void stop() {
