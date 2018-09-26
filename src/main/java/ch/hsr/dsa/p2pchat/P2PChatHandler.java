@@ -118,12 +118,11 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void sendMessage(User toUser, String message) {
         var chatMessage = new ChatMessage(ownUser, message);
-        try {
-            var peerAddress = getPeerAddressForUser(toUser);
-            peer.peer().sendDirect(peerAddress).object(chatMessage).start();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to load peerAddress for user"); //TODO handle error differently
-        }
+        peer.send(Number160.createHash(toUser.getName())).object(chatMessage).start();
+    }
+    public void sendMessage(PeerAddress peerAddress, String message) {
+        var chatMessage = new ChatMessage(ownUser, message);
+        peer.peer().sendDirect(peerAddress).object(chatMessage).start();
     }
 
     @Override

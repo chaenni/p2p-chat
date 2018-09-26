@@ -1,6 +1,7 @@
 package ch.hsr.dsa.p2pchat.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class User implements Serializable {
     private String name;
@@ -18,5 +19,23 @@ public class User implements Serializable {
         return "User{" +
             "name='" + name + '\'' +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        User user = (User) o;
+        return Objects.equals(name, user.name);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(name);
     }
 }

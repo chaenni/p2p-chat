@@ -10,11 +10,14 @@ sourceCompatibility = 1.10
 repositories {
     mavenCentral()
     maven {
-        url "http://tomp2p.net/dev/mvn/"
+        url "https://tomp2p.net/dev/mvn/"
     }
 }
 
 dependencies {
-    implementation group: "net.tomp2p", name : "tomp2p-all", version: "5.0-Beta8"
-    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    compile group: 'net.tomp2p' , name: 'tomp2p-all', version: '5.0-Beta8'
+    compile "io.reactivex.rxjava2:rxjava:2.2.2"
+    testCompile "org.mockito:mockito-core:2.+"
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.3.1")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.1")
 }
