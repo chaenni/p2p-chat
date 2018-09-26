@@ -1,28 +1,20 @@
 package ch.hsr.dsa.p2pchat.model;
 
-import java.time.LocalDateTime;
+public class ChatMessage implements Message {
 
-public class ChatMessage {
-
-    private String fromUsername;
+    private User fromUser;
     private String message;
-    private LocalDateTime time;
 
-    public ChatMessage(String fromUsername, String message, LocalDateTime time) {
-        this.fromUsername = fromUsername;
+    public ChatMessage(User fromUser, String message) {
+        this.fromUser = fromUser;
         this.message = message;
-        this.time = time;
     }
 
-    public String getFromUsername() {
-        return fromUsername;
+    public User getFromUser() {
+        return fromUser;
     }
 
     public String getMessage() {
         return message;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
     }
 }
