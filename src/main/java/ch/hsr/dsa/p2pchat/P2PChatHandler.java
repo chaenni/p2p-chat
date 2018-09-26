@@ -34,6 +34,7 @@ public class P2PChatHandler implements ChatHandler {
         return new P2PChatHandler(bootstrapPeer, username, port);
     }
 
+
     private P2PChatHandler(PeerAddress bootstrapPeer, String username, int port) throws IOException {
         ownUser = new User(username);
 
