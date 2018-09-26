@@ -13,5 +13,10 @@ public class User implements Serializable {
         return name;
     }
 
-    
+    @Override
+    public String toString() {
+        return "User{" +
+            "name='" + name + '\'' +
+            '}';
+    }
 }
