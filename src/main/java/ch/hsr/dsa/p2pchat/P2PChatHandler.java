@@ -118,6 +118,12 @@ public class P2PChatHandler implements ChatHandler {
         var chatMessage = new ChatMessage(ownUser, message);
         peer.send(Number160.createHash(toUser.getName())).object(chatMessage).start();
     }
+
+    @Override
+    public void sendGroupMessage(Group group, String message) {
+        //TODO implement
+    }
+
     public void sendMessage(PeerAddress peerAddress, String message) {
         var chatMessage = new ChatMessage(ownUser, message);
         peer.peer().sendDirect(peerAddress).object(chatMessage).start();
@@ -136,7 +142,7 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void inviteToGroup(User toUser) {
+    public void inviteToGroup(Group group, User toUser) {
         //TODO implement
     }
 
