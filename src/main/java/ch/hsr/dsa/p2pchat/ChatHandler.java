@@ -15,9 +15,12 @@ public interface ChatHandler {
 
     void sendMessage(User toUser, String message);
     void sendGroupMessage(Group group, String message);
-    void sendFriendRequest(String username);
+    void sendFriendRequest(User user);
     void createGroup(String name);
     void inviteToGroup(Group group, User toUser);
     void leaveGroup(Group group);
+
+    void acceptFriendRequest(User user);
+    void rejectFriendRequest(User user);
 
 }
