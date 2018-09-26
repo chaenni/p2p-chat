@@ -37,13 +37,8 @@ public class P2PChatHandler implements ChatHandler {
             System.out.println("Hans received message from " + message.getFromUser().getName() + ": " + message.getMessage());
         });
 
-        //peter.sendMessage(new User("Hans"), "Sali Hans");
-        //hans.sendMessage(new User("Peter"), "Sali Peter");
-
-        peter.sendMessage(hans.getPeerAddress(), "Sali Hans");
-        System.out.println(hans.getPeerAddress());
-
-        hans.sendMessage(peter.getPeerAddress(), "Sali Peter");
+        peter.sendMessage(new User("Hans"), "Sali Hans");
+        hans.sendMessage(new User("Peter"), "Sali Peter");
     }
 
     public static P2PChatHandler start( String username, int port) throws IOException {
@@ -67,6 +62,8 @@ public class P2PChatHandler implements ChatHandler {
                 System.err.println("Bootstrapping failed.");
             }
         }
+
+        storeOwnAddressInDHT();
 
         messageReceived = Observable.create(emitter -> {
             peer.peer().objectDataReply((sender, request) -> {
@@ -93,6 +90,11 @@ public class P2PChatHandler implements ChatHandler {
             .cast(FriendRequest.class);
     }
 
+    public void stop() {
+        removeOwnAddressFromDHT();
+        peer.shutdown();
+    }
+
     @Override
     public Observable<ChatMessage> chatMessages() {
         return chatMessages;
@@ -116,13 +118,13 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void sendMessage(User toUser, String message) {
         var chatMessage = new ChatMessage(ownUser, message);
-        peer.send(Number160.createHash(toUser.getName())).object(chatMessage).start();
+        try {
+            var peerAddress = getPeerAddressForUser(toUser);
+            peer.peer().sendDirect(peerAddress).object(chatMessage).start();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Failed to load peerAddress for user"); //TODO handle error differently
+        }
     }
-    public void sendMessage(PeerAddress peerAddress, String message) {
-        var chatMessage = new ChatMessage(ownUser, message);
-        peer.peer().sendDirect(peerAddress).object(chatMessage).start();
-    }
-
 
     @Override
     public void sendFriendRequest(String username) {
@@ -148,4 +150,23 @@ public class P2PChatHandler implements ChatHandler {
     public PeerAddress getPeerAddress() {
         return peer.peer().peerAddress();
     }
+
+    public PeerAddress getPeerAddressForUser(User user) throws IOException, ClassNotFoundException {
+        return (PeerAddress) peer.get(Number160.createHash(user.getName())).start().awaitUninterruptibly().data().object();
+    }
+
+    private void storeOwnAddressInDHT() throws IOException {
+        peer.put(Number160.createHash(ownUser.getName()))
+            .object(peer.peer().peerAddress())
+            .start()
+            .awaitUninterruptibly();
+    }
+
+    private void removeOwnAddressFromDHT() {
+        peer.remove(Number160.createHash(ownUser.getName()))
+            .all()
+            .start()
+            .awaitUninterruptibly();
+    }
+
 }
