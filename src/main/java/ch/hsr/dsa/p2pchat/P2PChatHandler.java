@@ -3,6 +3,7 @@ package ch.hsr.dsa.p2pchat;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendRequest;
 import ch.hsr.dsa.p2pchat.model.Group;
+import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.Message;
 import ch.hsr.dsa.p2pchat.model.OnlineNotification;
@@ -18,8 +19,8 @@ import net.tomp2p.peers.PeerAddress;
 public class P2PChatHandler implements ChatHandler {
 
     private PeerDHT peer;
-    private Observable<Message> messageReceived;
     private Observable<ChatMessage> chatMessages;
+    private Observable<GroupMessage> groupChatMessages;
     private Observable<User> friendCameOnline;
     private Observable<LeaveMessage> userLeftGroup;
     private Observable<FriendRequest> receivedFriendRequest;
@@ -50,9 +51,11 @@ public class P2PChatHandler implements ChatHandler {
 
         storeOwnAddressInDHT();
 
-        messageReceived = Observable.create(emitter -> {
+        var messageReceived = Observable.create(emitter -> {
             peer.peer().objectDataReply((sender, request) -> {
-                if (request instanceof Message) emitter.onNext((Message) request);
+                if (request instanceof Message) {
+                    emitter.onNext(request);
+                }
                 return null;
             });
         });
@@ -73,6 +76,10 @@ public class P2PChatHandler implements ChatHandler {
         receivedFriendRequest = messageReceived
             .filter(message -> message instanceof FriendRequest)
             .cast(FriendRequest.class);
+
+        groupChatMessages = messageReceived
+            .filter(message -> message instanceof GroupMessage)
+            .cast(GroupMessage.class);
     }
 
     public void stop() {
@@ -83,6 +90,11 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public Observable<ChatMessage> chatMessages() {
         return chatMessages;
+    }
+
+    @Override
+    public Observable<GroupMessage> groupChatMessages() {
+        return groupChatMessages;
     }
 
     @Override
@@ -102,24 +114,20 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void sendMessage(User toUser, String message) {
-        var chatMessage = new ChatMessage(ownUser, message);
-        try {
-            var peerAddress = getPeerAddressForUser(toUser);
-            peer.peer().sendDirect(peerAddress).object(chatMessage).start();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to load peerAddress for user"); //TODO handle error differently
-        }
+        sendMessage(toUser, new ChatMessage(ownUser, message));
     }
 
     @Override
     public void sendGroupMessage(Group group, String message) {
-        // TODO implement
+        var groupMessage = new GroupMessage(ownUser, message, group);
+        group.getMembers().stream()
+            .filter(member -> !member.equals(ownUser))
+            .forEach(member -> sendMessage(member, groupMessage));
     }
 
     @Override
     public void sendFriendRequest(User user) {
-        var friendRequestMessage = new FriendRequest(ownUser);
-        peer.send(Number160.createHash(user.getName())).object(friendRequestMessage).start();
+        sendMessage(user, new FriendRequest(ownUser));
     }
 
     @Override
@@ -152,7 +160,20 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     public PeerAddress getPeerAddressForUser(User user) throws IOException, ClassNotFoundException {
-        return (PeerAddress) peer.get(Number160.createHash(user.getName())).start().awaitUninterruptibly().data().object();
+        return (PeerAddress) peer.get(Number160.createHash(user.getName()))
+            .start()
+            .awaitUninterruptibly()
+            .data()
+            .object();
+    }
+
+    private void sendMessage(User toUser, Message message) {
+        try {
+            var peerAddress = getPeerAddressForUser(toUser);
+            peer.peer().sendDirect(peerAddress).object(message).start();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Failed to load peerAddress for user"); //TODO handle error differently
+        }
     }
 
     private void storeOwnAddressInDHT() throws IOException {
