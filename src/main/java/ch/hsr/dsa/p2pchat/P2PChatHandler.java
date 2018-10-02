@@ -97,7 +97,11 @@ public class P2PChatHandler implements ChatHandler {
         receivedFriendRequest = messageReceived
             .filter(message -> message instanceof FriendRequest)
             .cast(FriendRequest.class)
-            .map(FriendRequest::getFromUser);
+            .map(FriendRequest::getFromUser)
+            .map(user -> {
+                openFriendRequestsToMe.add(user);
+                return user;
+            });
 
         groupChatMessages = messageReceived
             .filter(message -> message instanceof GroupMessage)
@@ -107,7 +111,12 @@ public class P2PChatHandler implements ChatHandler {
             .filter(message -> message instanceof AcceptFriendRequestMessage)
             .cast(AcceptFriendRequestMessage.class)
             .map(AcceptFriendRequestMessage::getFromUser)
-            .filter(openFriendRequestsFromMe::contains);
+            .filter(openFriendRequestsFromMe::contains)
+            .map(user -> {
+                openFriendRequestsFromMe.remove(user);
+                friends.put(user, new FriendsListEntry(user));
+                return user;
+            });
 
         friendRequestRejected = messageReceived
             .filter(message -> message instanceof RejectFriendRequestMessage)
@@ -120,13 +129,6 @@ public class P2PChatHandler implements ChatHandler {
             if (friendListEntry != null) {
                 friendListEntry.setOnline(true);
             }
-        });
-
-        receivedFriendRequest.subscribe(user -> openFriendRequestsToMe.add(user));
-
-        friendRequestAccepted.subscribe(user -> {
-            openFriendRequestsFromMe.remove(user);
-            friends.put(user, new FriendsListEntry(user));
         });
 
         friendRequestRejected.subscribe(openFriendRequestsFromMe::remove);

@@ -1,5 +1,8 @@
 package ch.hsr.dsa.p2pchat;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
@@ -57,6 +60,23 @@ public class P2PChatHandlerTest {
         testObserver
             .awaitCount(1)
             .assertValueAt(0, message -> message.getName().equals("Hans"));
+    }
+
+
+    @Test
+    public void test_friend_list_should_be_updated_on_friend_request_accept() {
+        hans.receivedFriendRequest()
+            .delay(300, TimeUnit.MILLISECONDS)
+            .subscribe(hans::acceptFriendRequest);
+
+        var testObserver = peter.friendRequestAccepted().test();
+
+        peter.sendFriendRequest(new User("Hans"));
+
+        testObserver.awaitCount(1).assertOf(userTestObserver -> {
+            assertTrue(hans.friendsList().contains(new User("Peter")));
+            assertTrue(peter.friendsList().contains(new User("Hans")));
+        });
     }
 
     @Test
