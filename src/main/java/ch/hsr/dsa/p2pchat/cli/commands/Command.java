@@ -1,18 +1,22 @@
 package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
+import java.util.function.Consumer;
 
 public abstract class Command {
     public abstract String getName();
-    public final void run(ChatHandler handler, String commandInput) {
+    public final void run(Consumer<String> systemMessage, ChatHandler handler, String commandInput) {
         try {
             String[] args = CommandHelper.getArguments(getNumberOfArguments(), commandInput);
             onSuccess(handler, args);
         } catch (IllegalArgumentException e) {
-            printUsage();
+            printUsage(systemMessage);
         }
     }
     protected abstract void onSuccess(ChatHandler handler, String[] args);
     protected abstract int getNumberOfArguments();
-    public abstract void printUsage();
+    protected abstract String getUsage();
+    public void printUsage(Consumer<String> systemMessage) {
+        systemMessage.accept("Command usage: /" + getName() + " " + getUsage() );
+    }
 }

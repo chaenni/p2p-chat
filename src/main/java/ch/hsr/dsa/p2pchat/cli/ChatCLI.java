@@ -56,6 +56,12 @@ public class ChatCLI {
         System.out.println(message);
     }
 
+    public void displaySystemMessage(String message) {
+        ColorPrinter.printInColor(AnsiColor.YELLOW ,"System" + ", " + LocalDateTime.now().format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + ": ");
+        System.out.println(message);
+    }
+
     private void displayMessage(ChatMessage message) {
         displayMessage(AnsiColor.RED, Optional.empty(), message.getFromUser(), message.getMessage());
     }
@@ -87,7 +93,9 @@ public class ChatCLI {
         var commandName = commandInput.substring(1, commandInput.indexOf("/"));
         commands.stream().filter(command -> command.getName().equals(commandName))
             .findFirst()
-            .ifPresent(c -> c.run(handler, commandInput));
+            .ifPresent(c -> {
+                c.run(ChatCLI.this::displaySystemMessage, handler, commandInput);
+            });
     }
 
     public void stop() {

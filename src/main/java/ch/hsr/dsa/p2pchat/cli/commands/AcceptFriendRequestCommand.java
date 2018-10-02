@@ -21,6 +21,7 @@ public class AcceptFriendRequestCommand extends Command {
     }
 
     @Override
-    public void printUsage() {
+    public String getUsage() {
+        return "";
     }
 }
