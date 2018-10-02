@@ -5,7 +5,7 @@ import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.util.Collections;
 
-public class InviteToGroupCommand implements Command {
+public class InviteToGroupCommand extends Command {
 
     @Override
     public String getName() {
@@ -13,8 +13,17 @@ public class InviteToGroupCommand implements Command {
     }
 
     @Override
-    public void run(ChatHandler handler, String commandInput) {
-        var args = CommandHelper.getArguements(2, commandInput);
-        handler.inviteToGroup(new Group(args[1], Collections.emptyList()), new User(args[2])); // TODO get real group
+    protected void onSuccess(ChatHandler handler, String[] args) {
+        handler.inviteToGroup(new Group(args[1], Collections.emptyList()), new User(args[2])); // TODO get real group?
+    }
+
+    @Override
+    protected int getNumberOfArguments() {
+        return 2;
+    }
+
+    @Override
+    public void printUsage() {
+
     }
 }
