@@ -23,6 +23,6 @@ public class LeaveGroupCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "";
+        return "groupname";
     }
 }

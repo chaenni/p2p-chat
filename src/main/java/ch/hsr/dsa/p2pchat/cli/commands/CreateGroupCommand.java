@@ -21,6 +21,6 @@ public class CreateGroupCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "";
+        return "groupname";
     }
 }

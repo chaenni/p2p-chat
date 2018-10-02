@@ -21,6 +21,6 @@ public class FriendRequestCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "";
+        return "username";
     }
 }

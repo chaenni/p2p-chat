@@ -22,6 +22,6 @@ public class SendMessageCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "";
+        return "username message";
     }
 }

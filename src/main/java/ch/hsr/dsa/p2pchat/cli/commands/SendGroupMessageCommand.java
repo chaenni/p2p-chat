@@ -23,6 +23,6 @@ public class SendGroupMessageCommand extends Command{
 
     @Override
     public String getUsage() {
-        return "";
+        return "groupname message";
     }
 }
