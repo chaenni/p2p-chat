@@ -1,5 +1,7 @@
 package ch.hsr.dsa.p2pchat;
 
+import ch.hsr.dsa.p2pchat.model.AcceptFriendRequestMessage;
+import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendRequest;
 import ch.hsr.dsa.p2pchat.model.FriendsListEntry;
@@ -8,11 +10,11 @@ import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.Message;
 import ch.hsr.dsa.p2pchat.model.OnlineNotification;
+import ch.hsr.dsa.p2pchat.model.RejectFriendRequestMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,32 +26,41 @@ import net.tomp2p.peers.PeerAddress;
 
 public class P2PChatHandler implements ChatHandler {
 
-    private PeerDHT peer;
-    private Observable<ChatMessage> chatMessages;
-    private Observable<GroupMessage> groupChatMessages;
-    private Observable<User> friendCameOnline;
-    private Observable<LeaveMessage> userLeftGroup;
-    private Observable<FriendRequest> receivedFriendRequest;
+    private final PeerDHT peer;
+    private final Observable<ChatMessage> chatMessages;
+    private final Observable<GroupMessage> groupChatMessages;
+    private final Observable<User> friendCameOnline;
+    private final Observable<LeaveMessage> userLeftGroup;
+    private final Observable<FriendRequest> receivedFriendRequest;
 
-    private User ownUser;
-    private Map<User, FriendsListEntry> friends;
+    private final User ownUser;
+    private final Map<User, FriendsListEntry> friends;
+    private final Set<User> openFriendRequestsFromMe;
+    private final Set<User> openFriendRequestsToMe;
 
-    public static P2PChatHandler start( String username, int port) throws IOException {
-        return start(null, username, Collections.emptySet(), port);
+    public static P2PChatHandler start(String username, int port) throws IOException {
+        return start(null, username, ChatConfiguration.empty(), port);
     }
 
-    public static P2PChatHandler start(PeerAddress bootstrapPeer, String username, Set<User> friends, int port)
+    public static P2PChatHandler start(PeerAddress bootstrapPeer, String username,
+        ChatConfiguration configuration, int port) throws IOException {
+        return new P2PChatHandler(bootstrapPeer, username, configuration, port);
+    }
+
+
+    private P2PChatHandler(PeerAddress bootstrapPeer, String username, ChatConfiguration configuration, int port)
         throws IOException {
-        return new P2PChatHandler(bootstrapPeer, username, friends, port);
-    }
-
-
-    private P2PChatHandler(PeerAddress bootstrapPeer, String username, Set<User> friends, int port) throws IOException {
         ownUser = new User(username);
 
         peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(username)).ports(port).start()).start();
 
-        if (bootstrapPeer != null){
+        this.friends = configuration.getFriends().stream()
+            .collect(Collectors.toMap(friend -> friend, FriendsListEntry::new));
+
+        this.openFriendRequestsFromMe = configuration.getOpenFriendRequestsFromMe();
+        this.openFriendRequestsToMe = configuration.getOpenFriendRequestsToMe();
+
+        if (bootstrapPeer != null) {
             try {
                 peer.peer().bootstrap().peerAddress(bootstrapPeer).start().awaitListeners();
             } catch (InterruptedException e) {
@@ -88,10 +99,6 @@ public class P2PChatHandler implements ChatHandler {
         groupChatMessages = messageReceived
             .filter(message -> message instanceof GroupMessage)
             .cast(GroupMessage.class);
-
-
-        this.friends = friends.stream()
-            .collect(Collectors.toMap(friend -> friend, FriendsListEntry::new));
 
         friendCameOnline.subscribe(friend -> {
             var friendListEntry = this.friends.get(friend);
@@ -171,12 +178,19 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void acceptFriendRequest(User user) {
-
+        if (openFriendRequestsToMe.contains(user)) {
+            friends.put(user, new FriendsListEntry(user));
+            sendMessage(user, new AcceptFriendRequestMessage(ownUser));
+            openFriendRequestsToMe.remove(user);
+        }
     }
 
     @Override
     public void rejectFriendRequest(User user) {
-
+        if (openFriendRequestsToMe.contains(user)) {
+            sendMessage(user, new RejectFriendRequestMessage(ownUser));
+            openFriendRequestsToMe.remove(user);
+        }
     }
 
     public PeerAddress getPeerAddress() {

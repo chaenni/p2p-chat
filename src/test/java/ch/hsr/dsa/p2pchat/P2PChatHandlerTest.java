@@ -1,10 +1,10 @@
 package ch.hsr.dsa.p2pchat;
 
+import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +17,8 @@ public class P2PChatHandlerTest {
     @BeforeAll
     public static void setup() throws IOException {
         peter = P2PChatHandler.start( "Peter", 4000);
-        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", Collections.emptySet(), 4001);
-        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", Collections.emptySet(), 4002);
+        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", ChatConfiguration.empty(), 4001);
+        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", ChatConfiguration.empty(), 4002);
     }
 
     @Test
