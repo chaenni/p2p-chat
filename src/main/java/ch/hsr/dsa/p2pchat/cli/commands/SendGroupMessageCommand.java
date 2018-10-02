@@ -22,7 +22,7 @@ public class SendGroupMessageCommand extends Command{
     }
 
     @Override
-    public void printUsage() {
-
+    public String getUsage() {
+        return "groupname message";
     }
 }

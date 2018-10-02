@@ -20,7 +20,7 @@ public class CreateGroupCommand extends Command {
     }
 
     @Override
-    public void printUsage() {
-
+    public String getUsage() {
+        return "groupname";
     }
 }
