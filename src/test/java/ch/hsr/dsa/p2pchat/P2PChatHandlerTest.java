@@ -44,6 +44,18 @@ public class P2PChatHandlerTest {
     }
 
     @Test
+    public void test_should_receive_friend_request_accept_message_when_accepting_friend_requests() {
+        hans.receivedFriendRequest().subscribe(hans::acceptFriendRequest);
+        var testObserver = peter.friendRequestAccepted().test();
+
+        peter.sendFriendRequest(new User("Hans"));
+
+        testObserver
+            .awaitCount(1)
+            .assertValueAt(0, message -> message.getName().equals("Hans"));
+    }
+
+    @Test
     public void test_should_receive_group_message() {
         var testObserverEmma = emma.groupChatMessages().test();
         var testObserverHans = hans.groupChatMessages().test();
