@@ -1,7 +1,7 @@
 package ch.hsr.dsa.p2pchat.model;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ChatConfiguration implements Serializable {
@@ -11,11 +11,11 @@ public class ChatConfiguration implements Serializable {
     private Set<User> openFriendRequestsToMe;
 
     public ChatConfiguration(Set<User> friends, Set<User> openFriendRequestsFromMe, Set<User> openFriendRequestsToMe) {
-        this.friends = friends == null ? Collections.emptySet() : friends;
+        this.friends = friends == null ? new HashSet<>() : friends;
         this.openFriendRequestsFromMe = openFriendRequestsFromMe
-            == null ? Collections.emptySet() : openFriendRequestsFromMe;
+            == null ? new HashSet<>() : openFriendRequestsFromMe;
         this.openFriendRequestsToMe = openFriendRequestsFromMe
-            == null ? Collections.emptySet() : openFriendRequestsFromMe;
+            == null ? new HashSet<>() : openFriendRequestsFromMe;
     }
 
     public Set<User> getFriends() {

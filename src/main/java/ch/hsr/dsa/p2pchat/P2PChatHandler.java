@@ -122,7 +122,7 @@ public class P2PChatHandler implements ChatHandler {
             }
         });
 
-        receivedFriendRequest.subscribe(openFriendRequestsToMe::add);
+        receivedFriendRequest.subscribe(user -> openFriendRequestsToMe.add(user));
 
         friendRequestAccepted.subscribe(user -> {
             openFriendRequestsFromMe.remove(user);

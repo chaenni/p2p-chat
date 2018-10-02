@@ -44,8 +44,8 @@ public class ChatCLI {
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
     }
 
-    private void displayFriendRequest(FriendRequest friendRequest) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), friendRequest.getFromUser(), "User has send you a friend request type \"/accept" + friendRequest.getFromUser() + "\" or \"/reject " + friendRequest.getFromUser() + "\"");
+    private void displayFriendRequest(User user) {
+        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has send you a friend request type \"/accept" + user + "\" or \"/reject " + user + "\"");
 
     }
 

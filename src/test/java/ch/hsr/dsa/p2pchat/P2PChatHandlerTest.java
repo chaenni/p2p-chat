@@ -5,6 +5,7 @@ import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,10 @@ public class P2PChatHandlerTest {
 
     @Test
     public void test_should_receive_friend_request_accept_message_when_accepting_friend_requests() {
-        hans.receivedFriendRequest().subscribe(hans::acceptFriendRequest);
+        hans.receivedFriendRequest()
+            .delay(300, TimeUnit.MILLISECONDS)
+            .subscribe(hans::acceptFriendRequest);
+
         var testObserver = peter.friendRequestAccepted().test();
 
         peter.sendFriendRequest(new User("Hans"));
