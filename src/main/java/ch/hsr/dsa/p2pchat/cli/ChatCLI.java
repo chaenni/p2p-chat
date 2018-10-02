@@ -46,7 +46,7 @@ public class ChatCLI {
     }
 
     private void displayFriendRequest(FriendRequest friendRequest) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), friendRequest.getFromUser(), "User has send you a friend request type \"/accept" + friendRequest.getFromUser() + "\" or \"/reject " + friendRequest.getFromUser() + "\"");
+        displayMessage(AnsiColor.GREEN, Optional.empty(), friendRequest.getFromUser(), "User has send you a friend request type \"/accept" + friendRequest.getFromUser() + "\" or \"/reject " + friendRequest.getFromUser() + "\"");
 
     }
 
@@ -64,7 +64,7 @@ public class ChatCLI {
     }
 
     private void displayMessage(ChatMessage message) {
-        displayMessage(AnsiColor.RED, Optional.empty(), message.getFromUser(), message.getMessage());
+        displayMessage(AnsiColor.BLUE, Optional.empty(), message.getFromUser(), message.getMessage());
     }
 
     private void displayFriendCameOnline(User user) {

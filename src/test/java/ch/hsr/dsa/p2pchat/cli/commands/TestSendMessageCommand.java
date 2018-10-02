@@ -15,7 +15,7 @@ public class TestSendMessageCommand {
         var userName ="user";
         var message = "this is a complicated message 12345! --";
 
-        cmd.run(handler, "/" + cmd.getName() + " " + userName + " " + message);
+        cmd.run((s) -> {}, handler, "/" + cmd.getName() + " " + userName + " " + message);
         verify(handler, atLeast(1)).sendMessage(new User(userName), message );
     }
 
@@ -26,7 +26,7 @@ public class TestSendMessageCommand {
         var userName ="user";
         var message = "this is a complicated message 12345! --";
 
-        cmd.run(handler,"/" + cmd.getName() + "    " + userName + "     " + message);
+        cmd.run((s) -> {}, handler,"/" + cmd.getName() + "    " + userName + "     " + message);
         verify(handler, atLeast(1)).sendMessage(new User(userName), message );
     }
 }
