@@ -4,6 +4,7 @@ import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -16,8 +17,8 @@ public class P2PChatHandlerTest {
     @BeforeAll
     public static void setup() throws IOException {
         peter = P2PChatHandler.start( "Peter", 4000);
-        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", 4001);
-        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", 4002);
+        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", Collections.emptySet(), 4001);
+        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", Collections.emptySet(), 4002);
     }
 
     @Test
