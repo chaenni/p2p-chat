@@ -6,6 +6,7 @@ import ch.hsr.dsa.p2pchat.cli.colorprinter.ColorPrinter;
 import ch.hsr.dsa.p2pchat.cli.commands.AcceptFriendRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.Command;
 import ch.hsr.dsa.p2pchat.cli.commands.CreateGroupCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.FriendListCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.InviteToGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.LeaveGroupCommand;
@@ -35,7 +36,7 @@ public class ChatCLI {
     public ChatCLI(ChatHandler handler) {
         this.handler = handler;
         this.commands = new ArrayList<>();
-        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptFriendRequestCommand(), new RejectFriendRequestCommand());
+        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptFriendRequestCommand(), new RejectFriendRequestCommand(), new FriendListCommand());
 
         handler.chatMessages().subscribe(this::displayMessage);
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);

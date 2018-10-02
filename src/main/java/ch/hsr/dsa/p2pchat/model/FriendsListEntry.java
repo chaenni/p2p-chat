@@ -19,6 +19,10 @@ public class FriendsListEntry {
         isOnline = online;
     }
 
+    public User getFriend() {
+        return friend;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
