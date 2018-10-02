@@ -3,7 +3,7 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.User;
 
-public class AcceptFriendRequestCommand implements Command {
+public class AcceptFriendRequestCommand extends Command {
 
     @Override
     public String getName() {
@@ -11,8 +11,16 @@ public class AcceptFriendRequestCommand implements Command {
     }
 
     @Override
-    public void run(ChatHandler handler, String commandInput) {
-        var args = CommandHelper.getArguements(1, commandInput);
+    protected void onSuccess(ChatHandler handler, String[] args) {
         handler.acceptFriendRequest(new User(args[0]));
+    }
+
+    @Override
+    protected int getNumberOfArguments() {
+        return 1;
+    }
+
+    @Override
+    public void printUsage() {
     }
 }

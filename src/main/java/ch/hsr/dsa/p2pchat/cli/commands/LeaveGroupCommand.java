@@ -4,7 +4,7 @@ import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.Group;
 import java.util.Collections;
 
-public class LeaveGroupCommand implements Command {
+public class LeaveGroupCommand extends Command {
 
     @Override
     public String getName() {
@@ -12,8 +12,17 @@ public class LeaveGroupCommand implements Command {
     }
 
     @Override
-    public void run(ChatHandler handler, String commandInput) {
-        var args = CommandHelper.getArguements(1, commandInput);
+    protected void onSuccess(ChatHandler handler, String[] args) {
         handler.leaveGroup(new Group(args[0], Collections.emptyList())); // TODO get real group
+    }
+
+    @Override
+    protected int getNumberOfArguments() {
+        return 1;
+    }
+
+    @Override
+    public void printUsage() {
+
     }
 }

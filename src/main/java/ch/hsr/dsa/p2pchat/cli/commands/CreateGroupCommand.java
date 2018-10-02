@@ -2,7 +2,7 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
 
-public class CreateGroupCommand implements Command {
+public class CreateGroupCommand extends Command {
 
     @Override
     public String getName() {
@@ -10,8 +10,17 @@ public class CreateGroupCommand implements Command {
     }
 
     @Override
-    public void run(ChatHandler handler, String commandInput) {
-        var args = CommandHelper.getArguements(1, commandInput);
+    protected void onSuccess(ChatHandler handler, String[] args) {
         handler.createGroup(args[0]);
+    }
+
+    @Override
+    protected int getNumberOfArguments() {
+        return 1;
+    }
+
+    @Override
+    public void printUsage() {
+
     }
 }
