@@ -31,12 +31,14 @@ public class P2PChatHandler implements ChatHandler {
     private final Observable<GroupMessage> groupChatMessages;
     private final Observable<User> friendCameOnline;
     private final Observable<LeaveMessage> userLeftGroup;
-    private final Observable<FriendRequest> receivedFriendRequest;
+    private final Observable<User> receivedFriendRequest;
 
     private final User ownUser;
     private final Map<User, FriendsListEntry> friends;
     private final Set<User> openFriendRequestsFromMe;
     private final Set<User> openFriendRequestsToMe;
+    private final Observable<User> friendRequestAccepted;
+    private final Observable<User> friendRequestRejected;
 
     public static P2PChatHandler start(String username, int port) throws IOException {
         return start(null, username, ChatConfiguration.empty(), port);
@@ -94,11 +96,24 @@ public class P2PChatHandler implements ChatHandler {
 
         receivedFriendRequest = messageReceived
             .filter(message -> message instanceof FriendRequest)
-            .cast(FriendRequest.class);
+            .cast(FriendRequest.class)
+            .map(FriendRequest::getFromUser);
 
         groupChatMessages = messageReceived
             .filter(message -> message instanceof GroupMessage)
             .cast(GroupMessage.class);
+
+        friendRequestAccepted = messageReceived
+            .filter(message -> message instanceof AcceptFriendRequestMessage)
+            .cast(AcceptFriendRequestMessage.class)
+            .map(AcceptFriendRequestMessage::getFromUser)
+            .filter(openFriendRequestsFromMe::contains);
+
+        friendRequestRejected = messageReceived
+            .filter(message -> message instanceof RejectFriendRequestMessage)
+            .cast(RejectFriendRequestMessage.class)
+            .map(RejectFriendRequestMessage::getFromUser)
+            .filter(openFriendRequestsFromMe::contains);
 
         friendCameOnline.subscribe(friend -> {
             var friendListEntry = this.friends.get(friend);
@@ -106,6 +121,15 @@ public class P2PChatHandler implements ChatHandler {
                 friendListEntry.setOnline(true);
             }
         });
+
+        receivedFriendRequest.subscribe(openFriendRequestsToMe::add);
+
+        friendRequestAccepted.subscribe(user -> {
+            openFriendRequestsFromMe.remove(user);
+            friends.put(user, new FriendsListEntry(user));
+        });
+
+        friendRequestRejected.subscribe(openFriendRequestsFromMe::remove);
     }
 
     public void stop() {
@@ -134,8 +158,18 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public Observable<FriendRequest> receivedFriendRequest() {
+    public Observable<User> receivedFriendRequest() {
         return receivedFriendRequest;
+    }
+
+    @Override
+    public Observable<User> friendRequestAccepted() {
+        return friendRequestAccepted;
+    }
+
+    @Override
+    public Observable<User> friendRequestRejected() {
+        return friendRequestRejected;
     }
 
     @Override
@@ -158,6 +192,7 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void sendFriendRequest(User user) {
+        this.openFriendRequestsFromMe.add(user);
         sendMessage(user, new FriendRequest(ownUser));
     }
 

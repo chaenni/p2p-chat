@@ -1,9 +1,10 @@
 package ch.hsr.dsa.p2pchat.model;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
-public class ChatConfiguration {
+public class ChatConfiguration implements Serializable {
 
     private Set<User> friends;
     private Set<User> openFriendRequestsFromMe;

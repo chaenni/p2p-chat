@@ -40,7 +40,7 @@ public class P2PChatHandlerTest {
 
         testObserver
             .awaitCount(1)
-            .assertValueAt(0, message -> message.getFromUser().getName().equals("Peter"));
+            .assertValueAt(0, message -> message.getName().equals("Peter"));
     }
 
     @Test

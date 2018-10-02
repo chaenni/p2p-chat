@@ -13,7 +13,6 @@ import ch.hsr.dsa.p2pchat.cli.commands.RejectFriendRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendGroupMessageCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendMessageCommand;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
-import ch.hsr.dsa.p2pchat.model.FriendRequest;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.User;
@@ -44,8 +43,8 @@ public class ChatCLI {
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
     }
 
-    private void displayFriendRequest(FriendRequest friendRequest) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), friendRequest.getFromUser(), "User has send you a friend request type \"/accept" + friendRequest.getFromUser() + "\" or \"/reject " + friendRequest.getFromUser() + "\"");
+    private void displayFriendRequest(User user) {
+        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has send you a friend request type \"/accept" + user + "\" or \"/reject " + user + "\"");
 
     }
 
