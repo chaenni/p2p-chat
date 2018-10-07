@@ -15,6 +15,7 @@ import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -199,8 +200,14 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void createGroup(String name) {
-        //TODO implement
+    public void createGroup(String name) throws IOException{
+        Group group = new Group(name, Collections.singletonList(ownUser));
+        try {
+            Group g = getGroup(name);
+            throw new IllegalArgumentException();
+        } catch (ClassNotFoundException e) {
+            storeGroup(group);
+        }
     }
 
     @Override
@@ -209,8 +216,10 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void leaveGroup(Group group) {
-        //TODO implement
+    public void leaveGroup(Group group) throws IOException, ClassNotFoundException {
+        Group newGroup = getGroup(group.getName());
+        newGroup.getMembers().remove(ownUser);
+        storeGroup(newGroup);
     }
 
     @Override
@@ -261,6 +270,25 @@ public class P2PChatHandler implements ChatHandler {
     private void removeOwnAddressFromDHT() {
         peer.remove(Number160.createHash(ownUser.getName()))
             .all()
+            .start()
+            .awaitUninterruptibly();
+    }
+
+    private Group getGroup(String name) throws IOException, ClassNotFoundException {
+        return (Group) peer.get(Number160.createHash("Group: " + name)).
+            start()
+            .awaitUninterruptibly()
+            .dataMap()
+            .values()
+            .iterator()
+            .next()
+            .object();
+    }
+
+
+    private void storeGroup(Group group) throws IOException {
+        peer.put(Number160.createHash("Group: " + group.getName())).
+            object(group)
             .start()
             .awaitUninterruptibly();
     }

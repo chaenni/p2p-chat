@@ -2,6 +2,7 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.Group;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -14,7 +15,11 @@ public class LeaveGroupCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        handler.leaveGroup(new Group(args[0], Collections.emptyList())); // TODO get real group
+        try {
+            handler.leaveGroup(new Group(args[0], Collections.emptyList()));
+        } catch (IOException | ClassNotFoundException e) {
+            systemMessage.accept("Could not leave group + " + args[0]);
+        }
     }
 
     @Override

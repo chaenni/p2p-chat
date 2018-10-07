@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
+import io.reactivex.observers.BaseTestConsumer.TestWaitStrategy;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,7 @@ public class P2PChatHandlerTest {
         peter.sendFriendRequest(new User("Hans"));
 
         testObserver
-            .awaitCount(1)
+            .awaitCount(1, TestWaitStrategy.SLEEP_10MS, 30000)
             .assertValueAt(0, message -> message.getName().equals("Hans"));
     }
 
