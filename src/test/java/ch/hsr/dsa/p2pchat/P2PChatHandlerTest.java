@@ -63,7 +63,7 @@ public class P2PChatHandlerTest {
         peter.sendFriendRequest(new User("Hans"));
 
         testObserver
-            .awaitCount(1, TestWaitStrategy.SLEEP_10MS, 30000)
+            .awaitCount(1)
             .assertValueAt(0, message -> message.getName().equals("Hans"));
     }
 
