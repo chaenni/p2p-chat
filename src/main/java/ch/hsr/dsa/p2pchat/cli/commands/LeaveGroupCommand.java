@@ -15,9 +15,7 @@ public class LeaveGroupCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        try {
-            handler.leaveGroup(new Group(args[0], Collections.emptyList()));
-        } catch (IOException | ClassNotFoundException e) {
+        if(!handler.leaveGroup(new Group(args[0], Collections.emptyList()))) {
             systemMessage.accept("Could not leave group + " + args[0]);
         }
     }

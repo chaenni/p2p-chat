@@ -204,11 +204,16 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void createGroup(String name) throws IOException{
+    public boolean createGroup(String name){
         Group group = new Group(name, Collections.singletonList(ownUser));
         Optional<Group> g = getGroup(name);
-        if(g.isPresent()) throw new IllegalArgumentException();
-        storeGroup(group);
+        if(g.isPresent()) return false;
+        try {
+            storeGroup(group);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override
@@ -217,21 +222,25 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void leaveGroup(Group group) {
-        getGroup(group.getName()).ifPresent((g) -> {
-            List<User> members = new ArrayList<>(g.getMembers());
+    public boolean leaveGroup(Group group) {
+        Optional<Group> g = getGroup(group.getName());
+
+        if(g.isPresent()) {
+            List<User> members = new ArrayList<>(g.get().getMembers());
             members.remove(ownUser);
-            Group newGroup = new Group(g.getName(),members);
+            Group newGroup = new Group(g.get().getName(),members);
             try {
                 storeGroup(newGroup);
+                return true;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } );
+        }
+        return false;
     }
 
     @Override
-    public Optional<Group> getGroupInformation(String name) throws IOException, ClassNotFoundException {
+    public Optional<Group> getGroupInformation(String name) {
         return getGroup(name);
     }
 

@@ -27,10 +27,10 @@ public interface ChatHandler {
     void sendMessage(User toUser, String message);
     void sendGroupMessage(Group group, String message);
     void sendFriendRequest(User user);
-    void createGroup(String name) throws IOException;
+    boolean createGroup(String name);
     void inviteToGroup(Group group, User toUser);
-    void leaveGroup(Group group) throws IOException, ClassNotFoundException;
-    Optional<Group> getGroupInformation(String name) throws IOException, ClassNotFoundException;
+    boolean leaveGroup(Group group);
+    Optional<Group> getGroupInformation(String name);
 
     void acceptFriendRequest(User user);
     void rejectFriendRequest(User user);

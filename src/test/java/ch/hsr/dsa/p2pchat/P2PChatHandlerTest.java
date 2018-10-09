@@ -1,6 +1,7 @@
 package ch.hsr.dsa.p2pchat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -140,14 +141,14 @@ public class P2PChatHandlerTest {
     }
 
     @Test
-    public void test_cannot_Create_group_with_same_name() throws IOException {
+    public void test_cannot_Create_group_with_same_name() {
         String name = "Verein2";
         peter.createGroup(name);
-        assertThrows(IllegalArgumentException.class, () -> hans.createGroup(name));
+        assertFalse(hans.createGroup(name));
     }
 
     @Test
-    public void test_leaving_group_one_member_less() throws IOException, ClassNotFoundException {
+    public void test_leaving_group_one_member_less() {
         String name = "Verein1";
         peter.createGroup(name);
         peter.leaveGroup(new Group(name, Collections.emptyList()));

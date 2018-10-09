@@ -13,9 +13,7 @@ public class CreateGroupCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        try {
-            handler.createGroup(args[0]);
-        } catch (Exception e) {
+        if(!handler.createGroup(args[0])) {
             systemMessage.accept("Could not create group " + args[0]);
         }
     }
