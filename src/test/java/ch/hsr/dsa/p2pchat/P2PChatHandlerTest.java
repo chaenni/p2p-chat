@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
-import io.reactivex.observers.BaseTestConsumer.TestWaitStrategy;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,8 +78,8 @@ public class P2PChatHandlerTest {
         peter.sendFriendRequest(new User("Hans"));
 
         testObserver.awaitCount(1).assertOf(userTestObserver -> {
-            assertTrue(hans.friendsList().contains(new User("Peter")));
-            assertTrue(peter.friendsList().contains(new User("Hans")));
+            assertTrue(peter.friendsList().stream().allMatch(friend -> friend.getFriend().getName().equals("Hans")));
+            assertTrue(hans.friendsList().stream().allMatch(friend -> friend.getFriend().getName().equals("Peter")));
         });
     }
 
