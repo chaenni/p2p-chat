@@ -14,8 +14,12 @@ import ch.hsr.dsa.p2pchat.model.RejectFriendRequestMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.tomp2p.dht.PeerBuilderDHT;
@@ -26,6 +30,7 @@ import net.tomp2p.peers.PeerAddress;
 
 public class P2PChatHandler implements ChatHandler {
 
+    private static final String GROUP_PREFIX = "Group: ";
     private final PeerDHT peer;
     private final Observable<ChatMessage> chatMessages;
     private final Observable<GroupMessage> groupChatMessages;
@@ -199,8 +204,11 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public void createGroup(String name) {
-        //TODO implement
+    public void createGroup(String name) throws IOException{
+        Group group = new Group(name, Collections.singletonList(ownUser));
+        Optional<Group> g = getGroup(name);
+        if(g.isPresent()) throw new IllegalArgumentException();
+        storeGroup(group);
     }
 
     @Override
@@ -210,7 +218,21 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void leaveGroup(Group group) {
-        //TODO implement
+        getGroup(group.getName()).ifPresent((g) -> {
+            List<User> members = new ArrayList<>(g.getMembers());
+            members.remove(ownUser);
+            Group newGroup = new Group(g.getName(),members);
+            try {
+                storeGroup(newGroup);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } );
+    }
+
+    @Override
+    public Optional<Group> getGroupInformation(String name) throws IOException, ClassNotFoundException {
+        return getGroup(name);
     }
 
     @Override
@@ -261,6 +283,26 @@ public class P2PChatHandler implements ChatHandler {
     private void removeOwnAddressFromDHT() {
         peer.remove(Number160.createHash(ownUser.getName()))
             .all()
+            .start()
+            .awaitUninterruptibly();
+    }
+
+    private Optional<Group> getGroup(String name) {
+        try {
+            return Optional.of((Group) peer.get(Number160.createHash(GROUP_PREFIX + name))
+                .start()
+                .awaitUninterruptibly()
+                .data()
+                .object());
+        } catch(IOException | ClassNotFoundException | NullPointerException e) {
+            return Optional.empty();
+        }
+    }
+
+
+    private void storeGroup(Group group) throws IOException {
+        peer.put(Number160.createHash(GROUP_PREFIX + group.getName())).
+            object(group)
             .start()
             .awaitUninterruptibly();
     }

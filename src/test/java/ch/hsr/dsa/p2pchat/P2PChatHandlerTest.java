@@ -1,13 +1,18 @@
 package ch.hsr.dsa.p2pchat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
+import io.reactivex.observers.BaseTestConsumer.TestWaitStrategy;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -112,6 +117,44 @@ public class P2PChatHandlerTest {
         peter.sendGroupMessage(group, "Hello");
 
         testObserver.assertNoValues();
+    }
+
+    @Test
+    public void test_should_create_group() throws IOException, ClassNotFoundException {
+        String name = "Verein4";
+        peter.createGroup(name);
+        Optional<Group> group = peter.getGroupInformation(name);
+        assumeTrue(group.isPresent());
+        Group g = group.get();
+        assertEquals(name, g.getName());
+    }
+
+    @Test
+    public void test_group_created_should_contain_himself() throws IOException, ClassNotFoundException {
+        String name = "Verein3";
+        peter.createGroup(name);
+        Optional<Group> group = peter.getGroupInformation(name);
+        assumeTrue(group.isPresent());
+        Group g = group.get();
+        assertTrue(g.getMembers().size() == 1 && g.getMembers().contains(new User("Peter")));
+    }
+
+    @Test
+    public void test_cannot_Create_group_with_same_name() throws IOException {
+        String name = "Verein2";
+        peter.createGroup(name);
+        assertThrows(IllegalArgumentException.class, () -> hans.createGroup(name));
+    }
+
+    @Test
+    public void test_leaving_group_one_member_less() throws IOException, ClassNotFoundException {
+        String name = "Verein1";
+        peter.createGroup(name);
+        peter.leaveGroup(new Group(name, Collections.emptyList()));
+        Optional<Group> group = peter.getGroupInformation(name);
+        assumeTrue(group.isPresent());
+        Group g = group.get();
+        assertEquals(0, g.getMembers().size());
     }
 
 }
