@@ -186,7 +186,11 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void sendMessage(User toUser, String message) {
-        sendMessage(toUser, new ChatMessage(ownUser, message));
+        if (isFriendOf(toUser)) {
+            sendMessage(toUser, new ChatMessage(ownUser, message));
+        } else {
+            // TODO user is not a friend
+        }
     }
 
     @Override
@@ -199,8 +203,12 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void sendFriendRequest(User user) {
-        this.openFriendRequestsFromMe.add(user);
-        sendMessage(user, new FriendRequest(ownUser));
+        if (isFriendOf(user)) {
+            // TODO user is already a friend
+        } else {
+            this.openFriendRequestsFromMe.add(user);
+            sendMessage(user, new FriendRequest(ownUser));
+        }
     }
 
     @Override
@@ -310,10 +318,15 @@ public class P2PChatHandler implements ChatHandler {
 
 
     private void storeGroup(Group group) throws IOException {
+        //TODO check if group already exists
         peer.put(Number160.createHash(GROUP_PREFIX + group.getName())).
             object(group)
             .start()
             .awaitUninterruptibly();
+    }
+
+    private boolean isFriendOf(User user) {
+        return friendsList().stream().anyMatch(friend -> friend.getFriend().equals(user));
     }
 
 }

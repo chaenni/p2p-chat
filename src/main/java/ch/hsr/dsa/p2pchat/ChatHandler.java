@@ -7,7 +7,6 @@ import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 

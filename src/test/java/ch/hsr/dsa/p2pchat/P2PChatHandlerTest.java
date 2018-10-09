@@ -2,7 +2,6 @@ package ch.hsr.dsa.p2pchat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -10,35 +9,53 @@ import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class P2PChatHandlerTest {
 
-    private static P2PChatHandler peter;
-    private static P2PChatHandler hans;
-    private static P2PChatHandler emma;
+    private P2PChatHandler peter;
+    private P2PChatHandler hans;
+    private P2PChatHandler emma;
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        peter = P2PChatHandler.start( "Peter", 4000);
-        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", ChatConfiguration.empty(), 4001);
-        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", ChatConfiguration.empty(), 4002);
+    @BeforeEach
+    public void setup() throws IOException {
+        peter = P2PChatHandler.start( "Peter", findFreePort());
+        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", ChatConfiguration.empty(), findFreePort());
+        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", ChatConfiguration.empty(), findFreePort());
     }
 
     @Test
-    public void test_should_receive_chat_message() {
+    public void test_should_receive_chat_message_from_friend() {
+
         var testObserver = hans.chatMessages().test();
 
-        peter.sendMessage(new User("Hans"), "Sali Hans");
+        hans.receivedFriendRequest()
+            .delay(300, TimeUnit.MILLISECONDS)
+            .subscribe(hans::acceptFriendRequest);
+
+        peter.friendRequestAccepted()
+            .subscribe(user -> peter.sendMessage(new User("Hans"), "Sali Hans"));
+
+        peter.sendFriendRequest(new User("Hans"));
 
         testObserver
             .awaitCount(1)
             .assertValueAt(0, message -> message.getMessage().equals("Sali Hans"));
+    }
+
+    @Test
+    public void test_should_not_receive_chat_message_from_not_friend() {
+        var testObserver = hans.chatMessages().test();
+        peter.sendMessage(new User("Hans"), "Sali Hans");
+
+        testObserver
+            .assertNoValues();
     }
 
     @Test
@@ -156,5 +173,8 @@ public class P2PChatHandlerTest {
         Group g = group.get();
         assertEquals(0, g.getMembers().size());
     }
-
+    //fun findFreePort() = ServerSocket(0).use { it.localPort }
+    int findFreePort() throws IOException {
+        return new ServerSocket(0).getLocalPort();
+    }
 }
