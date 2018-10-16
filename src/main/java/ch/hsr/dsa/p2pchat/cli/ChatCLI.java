@@ -90,7 +90,7 @@ public class ChatCLI {
     }
 
     private void handleCommandInput(String commandInput) {
-        var commandName = commandInput.substring(1, commandInput.indexOf("/"));
+        var commandName = commandInput.substring(1, commandInput.indexOf(" "));
         commands.stream().filter(command -> command.getName().equals(commandName))
             .findFirst()
             .ifPresent(c -> {
