@@ -91,7 +91,8 @@ public class P2PChatHandler implements ChatHandler {
                 }
                 return null;
             });
-        });
+        }).share();
+
 
         chatMessages = messageReceived
             .filter(message -> message instanceof ChatMessage)

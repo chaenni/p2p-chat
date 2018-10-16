@@ -42,10 +42,21 @@ public class ChatCLI {
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);
         handler.userLeftGroup().subscribe(this::displayUserLeftGroup);
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
+        handler.friendRequestAccepted().subscribe(this::displayFriendRequestAccepted);
+        handler.friendRequestRejected().subscribe(this::displayFriendRequestRejected);
+
+    }
+
+    private void displayFriendRequestRejected(User user) {
+        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has rejected your request");
+    }
+
+    private void displayFriendRequestAccepted(User user) {
+        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has accepted your request");
     }
 
     private void displayFriendRequest(User user) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has send you a friend request type \"/accept" + user.getName() + "\" or \"/reject " + user.getName() + "\"");
+        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has send you a friend request type \"/accept " + user.getName() + "\" or \"/reject " + user.getName() + "\"");
 
     }
 
