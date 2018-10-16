@@ -90,8 +90,12 @@ public class ChatCLI {
     }
 
     private void handleCommandInput(String commandInput) {
-        var commandName = commandInput.substring(1, commandInput.indexOf(" "));
-        commands.stream().filter(command -> command.getName().equals(commandName))
+        var commandName = commandInput.substring(1);
+        if(commandInput.indexOf(" ") > 0)
+            commandName = commandName.substring(0, commandInput.indexOf(" ")).trim();
+
+        String finalCommandName = commandName;
+        commands.stream().filter(command -> command.getName().equals(finalCommandName))
             .findFirst()
             .ifPresent(c -> {
                 c.run(ChatCLI.this::displaySystemMessage, handler, commandInput);
