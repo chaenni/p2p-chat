@@ -46,20 +46,19 @@ public class P2PChatHandler implements ChatHandler {
     private final Observable<User> friendRequestRejected;
 
     public static P2PChatHandler start(String username, int port) throws IOException {
-        return start(null, username, ChatConfiguration.empty(), port);
+        return start(null, ChatConfiguration.builder().setOwnUser(username).build(), port);
     }
 
-    public static P2PChatHandler start(PeerAddress bootstrapPeer, String username,
-        ChatConfiguration configuration, int port) throws IOException {
-        return new P2PChatHandler(bootstrapPeer, username, configuration, port);
+    public static P2PChatHandler start(PeerAddress bootstrapPeer, ChatConfiguration configuration, int port) throws IOException {
+        return new P2PChatHandler(bootstrapPeer, configuration, port);
     }
 
 
-    private P2PChatHandler(PeerAddress bootstrapPeer, String username, ChatConfiguration configuration, int port)
+    private P2PChatHandler(PeerAddress bootstrapPeer, ChatConfiguration configuration, int port)
         throws IOException {
-        ownUser = new User(username);
+        ownUser = configuration.getOwnUser();
 
-        peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(username)).ports(port).start()).start();
+        peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(ownUser.getName())).ports(port).start()).start();
 
         this.friends = configuration.getFriends().stream()
             .collect(Collectors.toMap(friend -> friend, FriendsListEntry::new));

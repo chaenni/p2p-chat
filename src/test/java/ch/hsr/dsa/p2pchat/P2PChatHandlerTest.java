@@ -26,27 +26,34 @@ public class P2PChatHandlerTest {
     @BeforeEach
     public void setup() throws IOException {
         peter = P2PChatHandler.start( "Peter", findFreePort());
-        hans = P2PChatHandler.start(peter.getPeerAddress(), "Hans", ChatConfiguration.empty(), findFreePort());
-        emma = P2PChatHandler.start(peter.getPeerAddress(), "Emma", ChatConfiguration.empty(), findFreePort());
+        hans = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder()
+            .setOwnUser("Hans").build(), findFreePort());
+        emma = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder()
+            .setOwnUser("Emma").build(), findFreePort());
     }
 
     @Test
     public void test_should_receive_chat_message_from_friend() {
 
-        var testObserver = hans.chatMessages().test();
+        var testMessageObserver = hans.chatMessages().test();
 
         hans.receivedFriendRequest()
             .delay(300, TimeUnit.MILLISECONDS)
             .subscribe(hans::acceptFriendRequest);
 
         peter.friendRequestAccepted()
-            .subscribe(user -> peter.sendMessage(new User("Hans"), "Sali Hans"));
+            .delay(300, TimeUnit.MILLISECONDS)
+            .subscribe(user -> peter.sendMessage(user, "Sali"));
 
         peter.sendFriendRequest(new User("Hans"));
 
-        testObserver
+        testMessageObserver
             .awaitCount(1)
-            .assertValueAt(0, message -> message.getMessage().equals("Sali Hans"));
+            .assertValueAt(0, message -> message.getMessage().equals("Sali"));
+
+        testMessageObserver
+            .awaitCount(1)
+            .assertValueAt(0, message -> message.getMessage().equals("Sali"));
     }
 
     @Test
