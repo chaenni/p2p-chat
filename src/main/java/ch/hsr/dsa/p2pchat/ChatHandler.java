@@ -1,5 +1,6 @@
 package ch.hsr.dsa.p2pchat;
 
+import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendsListEntry;
 import ch.hsr.dsa.p2pchat.model.Group;
@@ -34,4 +35,5 @@ public interface ChatHandler {
     void acceptFriendRequest(User user);
     void rejectFriendRequest(User user);
 
+    ChatConfiguration getConfiguration();
 }

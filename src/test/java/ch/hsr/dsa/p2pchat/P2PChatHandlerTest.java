@@ -9,7 +9,6 @@ import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -25,11 +24,11 @@ public class P2PChatHandlerTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        peter = P2PChatHandler.start( "Peter", findFreePort());
-        hans = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder()
-            .setOwnUser("Hans").build(), findFreePort());
-        emma = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder()
-            .setOwnUser("Emma").build(), findFreePort());
+        peter = P2PChatHandler.start(ChatConfiguration.builder().setOwnUser("Peter").build());
+
+        hans = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder().setOwnUser("Hans").build());
+
+        emma = P2PChatHandler.start(peter.getPeerAddress(), ChatConfiguration.builder().setOwnUser("Emma").build());
     }
 
     @Test
@@ -179,9 +178,5 @@ public class P2PChatHandlerTest {
         assumeTrue(group.isPresent());
         Group g = group.get();
         assertEquals(0, g.getMembers().size());
-    }
-    //fun findFreePort() = ServerSocket(0).use { it.localPort }
-    int findFreePort() throws IOException {
-        return new ServerSocket(0).getLocalPort();
     }
 }
