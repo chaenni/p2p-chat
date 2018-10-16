@@ -6,12 +6,11 @@ public class CommandHelper {
         String[] args = new String[numberOfArguments];
 
         try {
-            int commandEndIndex = commandInput.indexOf(" ");
-            var restInput = commandInput.substring(commandEndIndex).trim();
+            var restInput = commandInput.trim();
             for (int i = 0; i < numberOfArguments; i++) {
+                restInput = restInput.substring(restInput.indexOf(" ")).trim();
                 args[i] = restInput.substring(0,
                     (i == numberOfArguments - 1) ? restInput.length() : restInput.indexOf(" "));
-                restInput = restInput.substring(restInput.indexOf(" ")).trim();
             }
         } catch (Exception e) {
             throw new IllegalArgumentException(e);

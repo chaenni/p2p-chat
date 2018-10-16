@@ -20,6 +20,17 @@ public class TestSendMessageCommand {
     }
 
     @Test
+    public void testNoEndingWhiteSpace() {
+        var handler = mock(ChatHandler.class);
+        var cmd = new SendMessageCommand();
+        var userName ="user";
+        var message = "this";
+
+        cmd.run((s) -> {}, handler, "/" + cmd.getName() + " " + userName + " " + message);
+        verify(handler, atLeast(1)).sendMessage(new User(userName), message );
+    }
+
+    @Test
     public void testWhitespaces() {
         var handler = mock(ChatHandler.class);
         var cmd = new SendMessageCommand();

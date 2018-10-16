@@ -78,7 +78,7 @@ public class ChatCLI {
         scannerTask = ForkJoinPool.commonPool().submit(() -> {
             Scanner scanner = new Scanner(System.in);
             while (scanner.hasNext()) {
-                String nextEntry = scanner.next();
+                String nextEntry = scanner.nextLine();
                 if (nextEntry.charAt(0) == '/') {
                     handleCommandInput(nextEntry);
                 } else {
