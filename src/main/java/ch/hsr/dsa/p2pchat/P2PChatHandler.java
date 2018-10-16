@@ -72,6 +72,7 @@ public class P2PChatHandler implements ChatHandler {
 
         peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(configuration.getOwnUser().getName()))
             .ports(port).start()).start();
+        System.out.println("Chat running on "+peer.peer().peerAddress().inetAddress()+ ":" + port);
 
         if (bootstrapper != null) {
             try {
