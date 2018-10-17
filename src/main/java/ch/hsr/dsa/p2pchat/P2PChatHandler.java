@@ -258,9 +258,14 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void sendGroupMessage(Group group, String message) {
         var groupMessage = new GroupMessage(configuration.getOwnUser(), message, group);
-        group.getMembers().stream()
-            .filter(member -> !member.equals(configuration.getOwnUser()))
-            .forEach(member -> sendMessage(member, groupMessage));
+        var realGroup = getGroup(group.getName());
+        if(realGroup.isPresent()) {
+            realGroup.get().getMembers().stream()
+                .filter(member -> !member.equals(configuration.getOwnUser()))
+                .forEach(member -> sendMessage(member, groupMessage));
+        } else {
+            errorMessages.onNext("Could not send message to group \""+group.getName()+"\"");
+        }
     }
 
     @Override

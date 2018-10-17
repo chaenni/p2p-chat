@@ -9,6 +9,7 @@ import ch.hsr.dsa.p2pchat.cli.commands.CreateGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendListCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.GetGroupInformationCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.HelpCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.InviteToGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.LeaveGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.RejectRequestCommand;
@@ -17,6 +18,7 @@ import ch.hsr.dsa.p2pchat.cli.commands.SendMessageCommand;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.GroupInvite;
+import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.time.LocalDateTime;
@@ -39,6 +41,7 @@ public class ChatCLI {
         this.handler = handler;
         this.commands = new ArrayList<>();
         Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptRequestCommand(), new RejectRequestCommand(), new FriendListCommand(), new GetGroupInformationCommand());
+        commands.add(new HelpCommand(commands));
 
         handler.chatMessages().subscribe(this::displayMessage);
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);
@@ -47,7 +50,13 @@ public class ChatCLI {
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
         handler.friendRequestAccepted().subscribe(this::displayFriendRequestAccepted);
         handler.friendRequestRejected().subscribe(this::displayFriendRequestRejected);
+        handler.receivedGroupRequest().subscribe(this::displayGroupRequest);
+        handler.errorMessages().subscribe(this::displaySystemMessage);
+        handler.groupChatMessages().subscribe(this::displayGroupMessage);
+    }
 
+    private void displayGroupMessage(GroupMessage groupMessage) {
+        displayMessage(AnsiColor.BLUE, Optional.of(groupMessage.getGroup()), Optional.of(groupMessage.getFromUser()), groupMessage.getMessage());
     }
 
     private void displayGroupRequest(GroupInvite group) {
