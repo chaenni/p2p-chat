@@ -17,9 +17,11 @@ public class AcceptRequestCommand extends Command {
         switch (args[0]) {
             case "user":
                 handler.acceptFriendRequest(new User(args[1]));
+                systemMessage.accept("Request accepted");
                 break;
             case "group":
                 handler.acceptGroupRequest(new Group(args[1]));
+                systemMessage.accept("Request accepted");
                 break;
             default:
                 printUsage(systemMessage);

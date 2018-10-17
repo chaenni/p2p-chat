@@ -15,7 +15,7 @@ public class InviteToGroupCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        handler.inviteToGroup(new Group(args[0], Collections.emptyList()), new User(args[1])); // TODO get real group?
+        handler.inviteToGroup(new Group(args[0], Collections.emptyList()), new User(args[1]));
     }
 
     @Override

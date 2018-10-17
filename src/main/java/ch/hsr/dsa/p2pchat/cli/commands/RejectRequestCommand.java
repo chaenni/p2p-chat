@@ -17,9 +17,11 @@ public class RejectRequestCommand extends Command {
         switch (args[0]) {
             case "user":
                 handler.rejectFriendRequest(new User(args[1]));
+                systemMessage.accept("Request Rejected");
                 break;
             case "group":
                 handler.rejectGroupRequest(new Group(args[1]));
+                systemMessage.accept("Request Rejected");
                 break;
             default:
                 printUsage(systemMessage);

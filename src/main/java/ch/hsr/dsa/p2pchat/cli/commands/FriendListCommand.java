@@ -14,6 +14,7 @@ public class FriendListCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
+        systemMessage.accept("Friendlist: ");
         handler.friendsList().forEach(f -> {
             systemMessage.accept(f.getFriend().getName() + " is " + (f.isOnline() ? "online" : "offline"));
         });

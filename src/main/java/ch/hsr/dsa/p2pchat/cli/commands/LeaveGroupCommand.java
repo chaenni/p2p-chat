@@ -15,9 +15,10 @@ public class LeaveGroupCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        if(!handler.leaveGroup(new Group(args[0], Collections.emptyList()))) {
+        if(!handler.leaveGroup(new Group(args[0]))) {
             systemMessage.accept("Could not leave group + " + args[0]);
         }
+        systemMessage.accept("You have left the Group \""+args[0]+"\"");
     }
 
     @Override

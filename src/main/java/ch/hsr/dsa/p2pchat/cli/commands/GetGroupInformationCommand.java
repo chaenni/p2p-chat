@@ -13,7 +13,11 @@ public class GetGroupInformationCommand extends Command {
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
         var group = handler.getGroupInformation(args[0]);
-        systemMessage.accept(group.toString());
+        if(group.isPresent()) {
+            systemMessage.accept(group.get().toString());
+        } else {
+            systemMessage.accept("Group with name \"" + args[0] + "\" does not exist");
+        }
     }
 
     @Override

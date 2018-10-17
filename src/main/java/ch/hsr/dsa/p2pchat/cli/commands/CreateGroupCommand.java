@@ -15,7 +15,9 @@ public class CreateGroupCommand extends Command {
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
         if(!handler.createGroup(args[0])) {
             systemMessage.accept("Could not create group " + args[0]);
+            return;
         }
+        systemMessage.accept("Group \"" + args[0] + "\" created. ");
     }
     @Override
     protected int getNumberOfArguments() {

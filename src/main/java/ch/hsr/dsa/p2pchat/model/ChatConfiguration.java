@@ -1,6 +1,7 @@
 package ch.hsr.dsa.p2pchat.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class ChatConfiguration implements Serializable {
         private Set<User> friends = new HashSet<>();
         private Set<User> openFriendRequestsFromMe = new HashSet<>();
         private Set<User> openFriendRequestsToMe = new HashSet<>();
-        private Map<String, GroupInvite> openGroupRequestsToMe; // GroupName
+        private Map<String, GroupInvite> openGroupRequestsToMe = new HashMap<>(); // GroupName
 
         private Builder() {}
 
