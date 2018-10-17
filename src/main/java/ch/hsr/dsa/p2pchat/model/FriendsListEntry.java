@@ -1,10 +1,12 @@
 package ch.hsr.dsa.p2pchat.model;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class FriendsListEntry {
     private User friend;
     private boolean isOnline;
+    private LocalDateTime lastOnlineNotificationTimestamp;
 
     public FriendsListEntry(User friend) {
         this.friend = friend;
@@ -17,10 +19,15 @@ public class FriendsListEntry {
 
     public void setOnline(boolean online) {
         isOnline = online;
+        lastOnlineNotificationTimestamp = LocalDateTime.now();
     }
 
     public User getFriend() {
         return friend;
+    }
+
+    public LocalDateTime getLastOnlineNotificationTimestamp() {
+        return lastOnlineNotificationTimestamp;
     }
 
     @Override

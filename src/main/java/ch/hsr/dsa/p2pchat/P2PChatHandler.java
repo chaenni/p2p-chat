@@ -13,6 +13,9 @@ import ch.hsr.dsa.p2pchat.model.OnlineNotification;
 import ch.hsr.dsa.p2pchat.model.RejectFriendRequestMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.tomp2p.dht.PeerBuilderDHT;
@@ -31,10 +35,13 @@ import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.p2p.builder.BootstrapBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
+import net.tomp2p.utils.Pair;
 
 public class P2PChatHandler implements ChatHandler {
 
     private static final String GROUP_PREFIX = "Group: ";
+    private static final long ONLINE_NOTIFICATION_INTERVAL_S = 30;
+
     private final PeerDHT peer;
     private final Observable<ChatMessage> chatMessages;
     private final Observable<GroupMessage> groupChatMessages;
@@ -48,12 +55,15 @@ public class P2PChatHandler implements ChatHandler {
     private final Observable<User> friendRequestRejected;
 
     private final Map<User, FriendsListEntry> friends;
+    private final Subject<String> errorMessages;
+    private final Disposable onlineNotificationTicker;
 
     public static P2PChatHandler start(ChatConfiguration configuration) throws IOException {
         return start(null, configuration);
     }
 
-    public static P2PChatHandler start(InetAddress bootstrapAddress, int port, ChatConfiguration configuration) throws IOException {
+    public static P2PChatHandler start(InetAddress bootstrapAddress, int port, ChatConfiguration configuration)
+        throws IOException {
         return new P2PChatHandler(peer -> peer.bootstrap().inetAddress(bootstrapAddress).ports(port), configuration);
     }
 
@@ -72,7 +82,7 @@ public class P2PChatHandler implements ChatHandler {
 
         peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(configuration.getOwnUser().getName()))
             .ports(port).start()).start();
-        System.out.println("Chat running on "+peer.peer().peerAddress().inetAddress()+ ":" + port);
+        System.out.println("Chat running on " + peer.peer().peerAddress().inetAddress() + ":" + port);
 
         if (bootstrapper != null) {
             try {
@@ -93,7 +103,6 @@ public class P2PChatHandler implements ChatHandler {
             });
         }).share();
 
-
         chatMessages = messageReceived
             .filter(message -> message instanceof ChatMessage)
             .cast(ChatMessage.class);
@@ -101,7 +110,16 @@ public class P2PChatHandler implements ChatHandler {
         friendCameOnline = messageReceived
             .filter(message -> message instanceof OnlineNotification)
             .cast(OnlineNotification.class)
-            .map(OnlineNotification::getUser);
+            .map(OnlineNotification::getUser)
+            .filter(friends::containsKey)
+            .map(friend -> {
+                var friendListEntry = this.friends.get(friend);
+                var wasAlreadyOnline = friendListEntry.isOnline();
+                friendListEntry.setOnline(true);
+                return new Pair<>(!wasAlreadyOnline, friend);
+            })
+            .filter(Pair::element0)
+            .map(Pair::element1);
 
         userLeftGroup = messageReceived
             .filter(message -> message instanceof LeaveMessage)
@@ -111,10 +129,7 @@ public class P2PChatHandler implements ChatHandler {
             .filter(message -> message instanceof FriendRequest)
             .cast(FriendRequest.class)
             .map(FriendRequest::getFromUser)
-            .map(user -> {
-                configuration.getOpenFriendRequestsToMe().add(user);
-                return user;
-            });
+            .doOnNext(configuration.getOpenFriendRequestsToMe()::add);
 
         groupChatMessages = messageReceived
             .filter(message -> message instanceof GroupMessage)
@@ -125,30 +140,33 @@ public class P2PChatHandler implements ChatHandler {
             .cast(AcceptFriendRequestMessage.class)
             .map(AcceptFriendRequestMessage::getFromUser)
             .filter(configuration.getOpenFriendRequestsFromMe()::contains)
-            .map(user -> {
+            .doOnNext(user -> {
                 configuration.getOpenFriendRequestsFromMe().remove(user);
                 friends.put(user, new FriendsListEntry(user));
-                return user;
             });
 
         friendRequestRejected = messageReceived
             .filter(message -> message instanceof RejectFriendRequestMessage)
             .cast(RejectFriendRequestMessage.class)
             .map(RejectFriendRequestMessage::getFromUser)
-            .filter(configuration.getOpenFriendRequestsFromMe()::contains);
+            .filter(configuration.getOpenFriendRequestsFromMe()::contains)
+            .doOnNext(configuration.getOpenFriendRequestsFromMe()::remove);
 
-        friendCameOnline.subscribe(friend -> {
-            var friendListEntry = this.friends.get(friend);
-            if (friendListEntry != null) {
-                friendListEntry.setOnline(true);
-            }
-        });
+        errorMessages = PublishSubject.create();
 
-        friendRequestRejected.subscribe(configuration.getOpenFriendRequestsFromMe()::remove);
+        onlineNotificationTicker = Observable
+            .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
+            .subscribe(time -> {
+                var onlineNotification = new OnlineNotification(configuration.getOwnUser());
+                friendsList().stream()
+                    .map(FriendsListEntry::getFriend)
+                    .forEach(friend -> sendMessage(friend, onlineNotification));
+            });
     }
 
     public void stop() {
         removeOwnAddressFromDHT();
+        onlineNotificationTicker.dispose();
         peer.shutdown();
     }
 
@@ -189,7 +207,7 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public Observable<String> errorMessages() {
-        return null;
+        return errorMessages;
     }
 
     @Override
@@ -202,7 +220,8 @@ public class P2PChatHandler implements ChatHandler {
         if (isFriendOf(toUser)) {
             sendMessage(toUser, new ChatMessage(configuration.getOwnUser(), message));
         } else {
-            // TODO user is not a friend
+            errorMessages
+                .onNext("You can only send messages to friends and " + toUser.getName() + " is not your friend.");
         }
     }
 
@@ -217,7 +236,7 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void sendFriendRequest(User user) {
         if (isFriendOf(user)) {
-            // TODO user is already a friend
+            errorMessages.onNext(user.getName() + " is already your friend.");
         } else {
             configuration.getOpenFriendRequestsFromMe().add(user);
             sendMessage(user, new FriendRequest(configuration.getOwnUser()));
@@ -351,7 +370,4 @@ public class P2PChatHandler implements ChatHandler {
     private static int findFreePort() throws IOException {
         return new ServerSocket(0).getLocalPort();
     }
-
-
-
 }
