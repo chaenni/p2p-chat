@@ -17,6 +17,7 @@ public interface ChatHandler {
     Observable<GroupMessage> groupChatMessages();
 
     Observable<User> friendCameOnline();
+    Observable<User> friendWentOffline();
     Observable<LeaveMessage> userLeftGroup();
     Observable<User> receivedFriendRequest();
     Observable<User> friendRequestAccepted();

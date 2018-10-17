@@ -1,6 +1,7 @@
 package ch.hsr.dsa.p2pchat.model;
 
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 public class FriendsListEntry {
@@ -26,6 +27,10 @@ public class FriendsListEntry {
         return friend;
     }
 
+    public boolean receivedOnlineNotificationsSince(TemporalUnit temporalUnit, long duration) {
+        return isOnline && timeSinceLastOnlineNotification(temporalUnit) <= duration;
+    }
+
     public LocalDateTime getLastOnlineNotificationTimestamp() {
         return lastOnlineNotificationTimestamp;
     }
@@ -45,5 +50,9 @@ public class FriendsListEntry {
     @Override
     public int hashCode() {
         return Objects.hash(friend);
+    }
+
+    private long timeSinceLastOnlineNotification(TemporalUnit temporalUnit) {
+        return lastOnlineNotificationTimestamp.until(LocalDateTime.now(), temporalUnit);
     }
 }
