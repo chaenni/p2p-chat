@@ -338,7 +338,6 @@ public class P2PChatHandler implements ChatHandler {
 
 
     private void storeGroup(Group group) throws IOException {
-        //TODO check if group already exists
         peer.put(Number160.createHash(GROUP_PREFIX + group.getName())).
             object(group)
             .start()
