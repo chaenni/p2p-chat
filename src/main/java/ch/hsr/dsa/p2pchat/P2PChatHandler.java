@@ -20,6 +20,7 @@ import io.reactivex.subjects.Subject;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +43,7 @@ public class P2PChatHandler implements ChatHandler {
 
     private static final String GROUP_PREFIX = "Group: ";
     private static final long ONLINE_NOTIFICATION_INTERVAL_S = 30;
+    private static final long OFFLINE_TIMEOUT_S = 2 * ONLINE_NOTIFICATION_INTERVAL_S;
 
     private final PeerDHT peer;
     private final Observable<ChatMessage> chatMessages;
@@ -58,7 +60,8 @@ public class P2PChatHandler implements ChatHandler {
 
     private final Map<User, FriendsListEntry> friends;
     private final Subject<String> errorMessages;
-    private final Disposable onlineNotificationTicker;
+    private final List<Disposable> disposables = new ArrayList<>();
+    private final Observable<User> friendWentOffline;
 
     public static P2PChatHandler start(ChatConfiguration configuration) throws IOException {
         return start(null, configuration);
@@ -163,19 +166,25 @@ public class P2PChatHandler implements ChatHandler {
 
         errorMessages = PublishSubject.create();
 
-        onlineNotificationTicker = Observable
+        friendWentOffline = Observable
+                .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
+                .flatMap(time -> Observable.fromIterable(friendsList()))
+                .filter(friend -> friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
+                .map(FriendsListEntry::getFriend);
+
+        disposables.add(Observable
             .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
             .subscribe(time -> {
                 var onlineNotification = new OnlineNotification(configuration.getOwnUser());
                 friendsList().stream()
                     .map(FriendsListEntry::getFriend)
                     .forEach(friend -> sendMessage(friend, onlineNotification));
-            });
+            }));
     }
 
     public void stop() {
         removeOwnAddressFromDHT();
-        onlineNotificationTicker.dispose();
+        disposables.forEach(Disposable::dispose);
         peer.shutdown();
     }
 
@@ -192,6 +201,11 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public Observable<User> friendCameOnline() {
         return friendCameOnline;
+    }
+
+    @Override
+    public Observable<User> friendWentOffline() {
+        return friendWentOffline;
     }
 
     @Override
