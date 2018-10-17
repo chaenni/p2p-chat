@@ -98,7 +98,7 @@ public class ChatCLI {
     }
 
     private void displayFriendWentOffline(User user) {
-        displayMessage(AnsiColor.GREEN, Optional.empty(), user, "went Offline");
+        displayMessage(AnsiColor.GREEN, Optional.empty(), Optional.of(user), "went Offline");
     }
 
     private void displayUserLeftGroup(LeaveMessage message) {
