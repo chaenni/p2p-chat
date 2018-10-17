@@ -21,6 +21,7 @@ public interface ChatHandler {
     Observable<User> receivedFriendRequest();
     Observable<User> friendRequestAccepted();
     Observable<User> friendRequestRejected();
+    Observable<String> errorMessages();
 
     Collection<FriendsListEntry> friendsList();
 

@@ -188,6 +188,11 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
+    public Observable<String> errorMessages() {
+        return null;
+    }
+
+    @Override
     public Collection<FriendsListEntry> friendsList() {
         return friends.values();
     }
@@ -347,5 +352,7 @@ public class P2PChatHandler implements ChatHandler {
     private static int findFreePort() throws IOException {
         return new ServerSocket(0).getLocalPort();
     }
+
+
 
 }
