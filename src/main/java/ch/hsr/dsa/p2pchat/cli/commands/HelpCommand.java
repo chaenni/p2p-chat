@@ -2,7 +2,6 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import java.util.Collection;
-import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
