@@ -43,6 +43,7 @@ public class ChatCLI {
 
         handler.chatMessages().subscribe(this::displayMessage);
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);
+        handler.friendWentOffline().subscribe(this::displayFriendWentOffline);
         handler.userLeftGroup().subscribe(this::displayUserLeftGroup);
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
         handler.friendRequestAccepted().subscribe(this::displayFriendRequestAccepted);
@@ -101,6 +102,10 @@ public class ChatCLI {
 
     private void displayFriendCameOnline(User user) {
         displayMessage(AnsiColor.GREEN, Optional.empty(), Optional.of(user), "is Online");
+    }
+
+    private void displayFriendWentOffline(User user) {
+        displayMessage(AnsiColor.GREEN, Optional.empty(), Optional.of(user), "went Offline");
     }
 
     private void displayUserLeftGroup(LeaveMessage message) {

@@ -42,8 +42,8 @@ import net.tomp2p.utils.Pair;
 public class P2PChatHandler implements ChatHandler {
 
     private static final String GROUP_PREFIX = "Group: ";
-    private static final long ONLINE_NOTIFICATION_INTERVAL_S = 30;
-    private static final long OFFLINE_TIMEOUT_S = 2 * ONLINE_NOTIFICATION_INTERVAL_S;
+    private static final long ONLINE_NOTIFICATION_INTERVAL_S = 10;
+    private static final long OFFLINE_TIMEOUT_S = 3 * ONLINE_NOTIFICATION_INTERVAL_S;
 
     private final PeerDHT peer;
     private final Observable<ChatMessage> chatMessages;
@@ -167,10 +167,12 @@ public class P2PChatHandler implements ChatHandler {
         errorMessages = PublishSubject.create();
 
         friendWentOffline = Observable
-                .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
+                .interval(OFFLINE_TIMEOUT_S, TimeUnit.SECONDS)
                 .flatMap(time -> Observable.fromIterable(friendsList()))
-                .filter(friend -> friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
-                .map(FriendsListEntry::getFriend);
+                .filter(FriendsListEntry::isOnline)
+                .filter(friend -> !friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
+                .map(FriendsListEntry::getFriend)
+                .doOnNext(friend -> friends.get(friend).setOnline(false));
 
         disposables.add(Observable
             .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
@@ -372,20 +374,25 @@ public class P2PChatHandler implements ChatHandler {
         return peer.peer().peerAddress();
     }
 
-    public PeerAddress getPeerAddressForUser(User user) throws IOException, ClassNotFoundException {
-        return (PeerAddress) peer.get(Number160.createHash(user.getName()))
+    public Optional<PeerAddress> getPeerAddressForUser(User user) throws IOException, ClassNotFoundException {
+        var data = peer.get(Number160.createHash(user.getName()))
             .start()
             .awaitUninterruptibly()
-            .data()
-            .object();
+            .data();
+
+        return data == null ? Optional.empty() : Optional.of((PeerAddress) data.object());
     }
 
     private void sendMessage(User toUser, Message message) {
+        Runnable userNotFound = () -> errorMessages.onNext("Peer address for user not found");
         try {
-            var peerAddress = getPeerAddressForUser(toUser);
-            peer.peer().sendDirect(peerAddress).object(message).start();
+            getPeerAddressForUser(toUser)
+                .ifPresentOrElse(
+                    address -> peer.peer().sendDirect(address).object(message).start(),
+                    userNotFound);
+
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Failed to load peerAddress for user"); //TODO handle error differently
+            userNotFound.run();
         }
     }
 
