@@ -3,18 +3,20 @@ package ch.hsr.dsa.p2pchat.cli;
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.AnsiColor;
 import ch.hsr.dsa.p2pchat.cli.colorprinter.ColorPrinter;
-import ch.hsr.dsa.p2pchat.cli.commands.AcceptFriendRequestCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.AcceptRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.Command;
 import ch.hsr.dsa.p2pchat.cli.commands.CreateGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendListCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendRequestCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.GetGroupInformationCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.InviteToGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.LeaveGroupCommand;
-import ch.hsr.dsa.p2pchat.cli.commands.RejectFriendRequestCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.RejectRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendGroupMessageCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendMessageCommand;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.Group;
+import ch.hsr.dsa.p2pchat.model.GroupInvite;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.time.LocalDateTime;
@@ -36,33 +38,46 @@ public class ChatCLI {
     public ChatCLI(ChatHandler handler) {
         this.handler = handler;
         this.commands = new ArrayList<>();
-        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptFriendRequestCommand(), new RejectFriendRequestCommand(), new FriendListCommand());
+        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptRequestCommand(), new RejectRequestCommand(), new FriendListCommand(), new GetGroupInformationCommand());
 
         handler.chatMessages().subscribe(this::displayMessage);
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);
+        handler.friendWentOffline().subscribe(this::displayFriendWentOffline);
         handler.userLeftGroup().subscribe(this::displayUserLeftGroup);
         handler.receivedFriendRequest().subscribe(this::displayFriendRequest);
         handler.friendRequestAccepted().subscribe(this::displayFriendRequestAccepted);
         handler.friendRequestRejected().subscribe(this::displayFriendRequestRejected);
-        handler.friendWentOffline().subscribe(this::displayFriendWentOffline);
 
+    }
+
+    private void displayGroupRequest(GroupInvite group) {
+        displayMessage(AnsiColor.BLUE, Optional.of(new Group(group.getGroupName())), Optional.empty(),
+            "You have received a Group Request type \"/accept group " + group.getGroupName() + "\" or \"/reject group " + group.getGroupName() + "\" "
+                + "or type \"/group " + group.getGroupName() +"\" to get information about the group");
     }
 
     private void displayFriendRequestRejected(User user) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has rejected your request");
+        displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(user), "User has rejected your request");
     }
 
     private void displayFriendRequestAccepted(User user) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has accepted your request");
+        displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(user), "User has accepted your request");
     }
 
     private void displayFriendRequest(User user) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), user, "User has send you a friend request type \"/accept " + user.getName() + "\" or \"/reject " + user.getName() + "\"");
+        displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(user), "User has send you a friend request type \"/accept user " + user.getName() + "\" or \"/reject user " + user.getName() + "\"");
 
     }
 
-    public void displayMessage(AnsiColor color, Optional<Group> group, User user, String message) {
-        var userString = group.map(g -> g +", ").orElse("")+user.getName();
+    public void displayMessage(AnsiColor color, Optional<Group> group, Optional<User> user, String message) {
+        var userString = "";
+        if(group.isPresent() && user.isPresent()) {
+            userString = group.get().getName() + ", " + user.get().getName();
+        } else if(group.isPresent()) {
+            userString = group.get().getName();
+        } else if(user.isPresent()) {
+            userString = user.get().getName();
+        }
         ColorPrinter.printInColor(color ,userString + ", " + LocalDateTime.now().format(
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + ": ");
         System.out.println(message);
@@ -75,11 +90,11 @@ public class ChatCLI {
     }
 
     private void displayMessage(ChatMessage message) {
-        displayMessage(AnsiColor.BLUE, Optional.empty(), message.getFromUser(), message.getMessage());
+        displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(message.getFromUser()), message.getMessage());
     }
 
     private void displayFriendCameOnline(User user) {
-        displayMessage(AnsiColor.GREEN, Optional.empty(), user, "is Online");
+        displayMessage(AnsiColor.GREEN, Optional.empty(), Optional.of(user), "is Online");
     }
 
     private void displayFriendWentOffline(User user) {
@@ -87,7 +102,7 @@ public class ChatCLI {
     }
 
     private void displayUserLeftGroup(LeaveMessage message) {
-        displayMessage(AnsiColor.GREEN, Optional.ofNullable(message.getGroup()), message.getUser(), "has left the group");
+        displayMessage(AnsiColor.GREEN, Optional.ofNullable(message.getGroup()),Optional.of(message.getUser()), "has left the group");
     }
 
     public Future<?> start() {

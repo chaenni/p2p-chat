@@ -6,6 +6,7 @@ import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendRequest;
 import ch.hsr.dsa.p2pchat.model.FriendsListEntry;
 import ch.hsr.dsa.p2pchat.model.Group;
+import ch.hsr.dsa.p2pchat.model.GroupInvite;
 import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.Message;
@@ -50,6 +51,7 @@ public class P2PChatHandler implements ChatHandler {
     private final Observable<User> friendCameOnline;
     private final Observable<LeaveMessage> userLeftGroup;
     private final Observable<User> receivedFriendRequest;
+    private final Observable<GroupInvite> receivedGroupRequest;
 
     private final ChatConfiguration configuration;
 
@@ -133,6 +135,13 @@ public class P2PChatHandler implements ChatHandler {
             .cast(FriendRequest.class)
             .map(FriendRequest::getFromUser)
             .doOnNext(configuration.getOpenFriendRequestsToMe()::add);
+
+        receivedGroupRequest = messageReceived
+            .filter(message -> message instanceof GroupInvite)
+            .cast(GroupInvite.class)
+            .doOnNext(invite -> {
+                configuration.getOpenGroupRequestsToMe().put(invite.getGroupName(), invite);
+            });
 
         groupChatMessages = messageReceived
             .filter(message -> message instanceof GroupMessage)
@@ -221,6 +230,11 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
+    public Observable<GroupInvite> receivedGroupRequest() {
+        return receivedGroupRequest;
+    }
+
+    @Override
     public Observable<String> errorMessages() {
         return errorMessages;
     }
@@ -275,7 +289,7 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void inviteToGroup(Group group, User toUser) {
-        //TODO implement
+        sendMessage(toUser, new GroupInvite(group.getName()));
     }
 
     @Override
@@ -319,8 +333,35 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
+    public void acceptGroupRequest(Group group) {
+        if(configuration.hasGroupInviteToGroup(group)) {
+            addUserToGroup(group, configuration.getOwnUser());
+        }
+    }
+
+    private void addUserToGroup(Group group, User user) {
+        Optional<Group> g = getGroup(group.getName());
+
+        if (g.isPresent()) {
+            List<User> members = new ArrayList<>(g.get().getMembers());
+            members.add(user);
+            Group newGroup = new Group(g.get().getName(), members);
+            try {
+                storeGroup(newGroup);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void rejectGroupRequest(Group group) {
+        configuration.getOpenGroupRequestsToMe().remove(group.getName());
+    }
+
+    @Override
     public ChatConfiguration getConfiguration() {
-        return null;
+        return configuration;
     }
 
     public PeerAddress getPeerAddress() {

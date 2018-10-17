@@ -163,6 +163,17 @@ public class P2PChatHandlerTest {
     }
 
     @Test
+    public void test_group_information_visible_to_non_user() throws IOException, ClassNotFoundException {
+        String name = "LegoGroup";
+        peter.createGroup(name);
+        Optional<Group> group = hans.getGroupInformation(name);
+        assumeTrue(group.isPresent());
+        Group g = group.get();
+        assertTrue(g.getMembers().size() == 1 && g.getMembers().contains(new User("Peter")));
+    }
+
+
+    @Test
     public void test_cannot_Create_group_with_same_name() {
         String name = "Verein2";
         peter.createGroup(name);

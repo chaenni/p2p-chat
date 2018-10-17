@@ -1,19 +1,23 @@
 package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
-import ch.hsr.dsa.p2pchat.model.User;
 import java.util.function.Consumer;
 
-public class RejectFriendRequestCommand extends Command {
+public class GetGroupInformationCommand extends Command {
 
     @Override
     public String getName() {
-        return "reject";
+        return "group";
     }
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        handler.rejectFriendRequest(new User(args[0]));
+        var group = handler.getGroupInformation(args[0]);
+        if(group.isPresent()) {
+            systemMessage.accept(group.get().toString());
+        } else {
+            systemMessage.accept("Group with name \"" + args[0] + "\" does not exist");
+        }
     }
 
     @Override
@@ -23,6 +27,6 @@ public class RejectFriendRequestCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "username";
+        return "groupname";
     }
 }
