@@ -25,6 +25,9 @@ public class ChatConfiguration implements Serializable {
         return friends;
     }
 
+    public void setFriends(Set<User> friends) {
+        this.friends = friends;
+    }
 
     public Set<User> getOpenFriendRequestsFromMe() {
         return openFriendRequestsFromMe;

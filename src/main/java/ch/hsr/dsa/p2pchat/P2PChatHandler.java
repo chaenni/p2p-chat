@@ -362,6 +362,7 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public ChatConfiguration getConfiguration() {
+        configuration.setFriends(friendsList().stream().map(FriendsListEntry::getFriend).collect(Collectors.toSet()));
         return configuration;
     }
 

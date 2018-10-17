@@ -15,18 +15,19 @@ public class Main {
 
         var input = new Scanner(System.in);
 
-        var config = getChatConfiguration();
+        var loadedConfig = ConfigHandler.loadConfiguration();
 
-        if(config == null) {
+        var config = loadedConfig.orElseGet(() -> {
             System.out.println("Hello, What is your name? ");
             var username = input.next();
-            config = ChatConfiguration.builder().setOwnUser(username).build();
-        }
+            return ChatConfiguration.builder().setOwnUser(username).build();
+        });
 
         System.out.println(config.getOwnUser().getName() + ", Do you want to create your own chat network? [y(es)/n(o)]");
+        ChatHandler chatHandler;
+
         if(input.next().startsWith("y")) {
-            var chat = new ChatCLI(P2PChatHandler.start(config));
-            chat.start().get();
+            chatHandler = P2PChatHandler.start(config);
         } else {
             System.out.println(config.getOwnUser().getName() + ", Could you tell me the IP.Address of somebody you now in the network");
             var ip = input.next(Pattern.compile("(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])"));
@@ -34,12 +35,20 @@ public class Main {
             System.out.println(config.getOwnUser().getName() + ", Could you tell me the Port of " + ip);
             var port = input.nextInt();
 
-            var chat = new ChatCLI((P2PChatHandler.start(Inet4Address.getByName(ip), port, config)));
-            chat.start().get();
+            chatHandler = P2PChatHandler.start(Inet4Address.getByName(ip), port, config);
         }
+
+        var chat = new ChatCLI(chatHandler);
+        chat.start().get();
+
+        ChatHandler finalChatHandler = chatHandler;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                ConfigHandler.storeConfiguration(finalChatHandler.getConfiguration());
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
-    private static ChatConfiguration getChatConfiguration() {
-        return null;
-    }
 }

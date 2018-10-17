@@ -42,6 +42,5 @@ public interface ChatHandler {
     void acceptGroupRequest(Group group);
     void rejectGroupRequest(Group group);
 
-
     ChatConfiguration getConfiguration();
 }
