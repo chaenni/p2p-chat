@@ -13,6 +13,11 @@ public class Group implements Serializable {
         this.members = members;
     }
 
+    public Group(String name) {
+        this(name, Collections.EMPTY_LIST);
+    }
+
+
     public String getName() {
         return name;
     }

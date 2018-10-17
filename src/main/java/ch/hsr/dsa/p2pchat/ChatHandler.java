@@ -4,6 +4,7 @@ import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendsListEntry;
 import ch.hsr.dsa.p2pchat.model.Group;
+import ch.hsr.dsa.p2pchat.model.GroupInvite;
 import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.User;
@@ -21,6 +22,7 @@ public interface ChatHandler {
     Observable<User> receivedFriendRequest();
     Observable<User> friendRequestAccepted();
     Observable<User> friendRequestRejected();
+    Observable<GroupInvite> receivedGroupRequest();
     Observable<String> errorMessages();
 
     Collection<FriendsListEntry> friendsList();
@@ -35,6 +37,10 @@ public interface ChatHandler {
 
     void acceptFriendRequest(User user);
     void rejectFriendRequest(User user);
+
+    void acceptGroupRequest(Group group);
+    void rejectGroupRequest(Group group);
+
 
     ChatConfiguration getConfiguration();
 }

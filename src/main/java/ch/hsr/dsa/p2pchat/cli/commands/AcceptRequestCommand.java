@@ -1,10 +1,11 @@
 package ch.hsr.dsa.p2pchat.cli.commands;
 
 import ch.hsr.dsa.p2pchat.ChatHandler;
+import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.util.function.Consumer;
 
-public class AcceptFriendRequestCommand extends Command {
+public class AcceptRequestCommand extends Command {
 
     @Override
     public String getName() {
@@ -13,7 +14,16 @@ public class AcceptFriendRequestCommand extends Command {
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        handler.acceptFriendRequest(new User(args[0]));
+        switch (args[0]) {
+            case "user":
+                handler.acceptFriendRequest(new User(args[1]));
+                break;
+            case "group":
+                handler.acceptGroupRequest(new Group(args[1]));
+                break;
+            default:
+                printUsage(systemMessage);
+        }
     }
 
     @Override
@@ -23,6 +33,6 @@ public class AcceptFriendRequestCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "username";
+        return "user username || group groupname";
     }
 }
