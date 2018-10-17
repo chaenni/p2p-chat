@@ -169,6 +169,7 @@ public class P2PChatHandler implements ChatHandler {
         friendWentOffline = Observable
                 .interval(OFFLINE_TIMEOUT_S, TimeUnit.SECONDS)
                 .flatMap(time -> Observable.fromIterable(friendsList()))
+                .filter(FriendsListEntry::isOnline)
                 .filter(friend -> !friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
                 .map(FriendsListEntry::getFriend)
                 .doOnNext(friend -> friends.get(friend).setOnline(false));
