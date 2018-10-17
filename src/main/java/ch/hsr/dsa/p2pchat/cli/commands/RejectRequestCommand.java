@@ -30,7 +30,7 @@ public class RejectRequestCommand extends Command {
 
     @Override
     protected int getNumberOfArguments() {
-        return 1;
+        return 2;
     }
 
     @Override
