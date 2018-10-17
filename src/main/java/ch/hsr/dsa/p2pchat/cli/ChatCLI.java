@@ -9,6 +9,7 @@ import ch.hsr.dsa.p2pchat.cli.commands.CreateGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendListCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendRequestCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.GetGroupInformationCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.HelpCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.InviteToGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.LeaveGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.RejectRequestCommand;
@@ -40,6 +41,7 @@ public class ChatCLI {
         this.handler = handler;
         this.commands = new ArrayList<>();
         Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptRequestCommand(), new RejectRequestCommand(), new FriendListCommand(), new GetGroupInformationCommand());
+        commands.add(new HelpCommand(commands));
 
         handler.chatMessages().subscribe(this::displayMessage);
         handler.friendCameOnline().subscribe(this::displayFriendCameOnline);
