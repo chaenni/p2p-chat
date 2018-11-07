@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 contract Chat {
 
-    enum MessageState {SENT, ACCEPTED, REJECTED}
+    enum MessageState {NOT_EXIST, SENT, ACCEPTED, REJECTED}
 
     mapping (bytes32 => MessageState) messages;
 
