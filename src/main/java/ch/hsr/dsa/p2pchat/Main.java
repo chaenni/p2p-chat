@@ -20,7 +20,18 @@ public class Main {
         var config = loadedConfig.orElseGet(() -> {
             System.out.println("Hello, What is your name? ");
             var username = input.next();
-            return ChatConfiguration.builder().setOwnUser(username).build();
+
+            System.out.println(username + ", What is your wallet path");
+            var path = input.next();
+
+            System.out.println(username + ", What is your wallet password");
+            var password = input.next();
+
+            return ChatConfiguration.builder()
+                .setOwnUser(username)
+                .setEthereumWalletPath(path)
+                .setEthereumWalletPassword(password)
+                .build();
         });
 
         System.out.println(config.getOwnUser().getName() + ", Do you want to create your own chat network? [y(es)/n(o)]");
