@@ -65,14 +65,6 @@ public class EthereumAdapter {
         web3.shutdown();
     }
 
-    private static byte[] hashString(String string) {
-        try {
-            return MessageDigest.getInstance("SHA-256").digest(string.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static  ContractGasProvider contractGasProvider(int gasLimit, int gasPrice) {
         return new ContractGasProvider() {
             @Override

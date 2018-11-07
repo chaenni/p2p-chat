@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +51,8 @@ public class P2PChatHandler implements ChatHandler {
     private static final long OFFLINE_TIMEOUT_S = 3 * ONLINE_NOTIFICATION_INTERVAL_S;
 
     private final PeerDHT peer;
+    private final EthereumAdapter ethereumAdapter;
+
     private final Observable<ChatMessage> chatMessages;
     private final Observable<GroupMessage> groupChatMessages;
     private final Observable<User> friendCameOnline;
@@ -84,6 +88,8 @@ public class P2PChatHandler implements ChatHandler {
     private P2PChatHandler(Function<Peer, BootstrapBuilder> bootstrapper, ChatConfiguration configuration)
         throws IOException {
         this.configuration = configuration;
+
+        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(), configuration.getEthereumWalletPassword());
 
         var port = findFreePort();
         this.friends = configuration.getFriends().stream()
@@ -270,17 +276,26 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void sendCertifiedMessage(User toUser, String message) {
-        //TODO
+        var hash = hashString(
+            configuration.getOwnUser().getName() +
+                toUser.getName() +
+                message +
+                System.currentTimeMillis());
+
+        ethereumAdapter.sendMessage(hash).
+            subscribe( i ->
+                sendMessage(toUser,
+                    new CertifiedChatMessage(configuration.getOwnUser(), message, hash)));
     }
 
     @Override
     public void acceptCertifiedMessage(byte[] hash) {
-        //TODO
+        ethereumAdapter.acceptMessage(hash);
     }
 
     @Override
     public void rejectCertifiedMessage(byte[] hash) {
-        //TODO
+        ethereumAdapter.rejectMessage(hash);
     }
 
     @Override
@@ -470,5 +485,13 @@ public class P2PChatHandler implements ChatHandler {
 
     private static int findFreePort() throws IOException {
         return new ServerSocket(0).getLocalPort();
+    }
+
+    private static byte[] hashString(String string) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(string.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
