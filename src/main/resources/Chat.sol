@@ -6,6 +6,7 @@ contract Chat {
     mapping (bytes32 => MessageState) messages;
 
     function sendMessage(bytes32 hash) public {
+        require(messages[hash] == MessageState.NOT_EXIST);
         messages[hash] = MessageState.SENT;
     }
 
