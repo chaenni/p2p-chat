@@ -65,6 +65,8 @@ public class ChatConfiguration implements Serializable {
         private Set<User> openFriendRequestsFromMe = new HashSet<>();
         private Set<User> openFriendRequestsToMe = new HashSet<>();
         private Map<String, GroupInvite> openGroupRequestsToMe = new HashMap<>(); // GroupName
+        private String ethereumWalletPath = "";
+        private String ethereumWalletPassword = "";
 
         private Builder() {}
 
@@ -93,6 +95,16 @@ public class ChatConfiguration implements Serializable {
             return this;
         }
 
+        public Builder setEthereumWalletPath(String path) {
+            this.ethereumWalletPath = path;
+            return this;
+        }
+
+        public Builder setEthereumWalletPassword(String password) {
+            this.ethereumWalletPath = password;
+            return this;
+        }
+
         public ChatConfiguration build() {
             ChatConfiguration configuration = new ChatConfiguration();
             configuration.ownUser = ownUser;
@@ -100,6 +112,8 @@ public class ChatConfiguration implements Serializable {
             configuration.openFriendRequestsFromMe = openFriendRequestsFromMe;
             configuration.openFriendRequestsToMe = openFriendRequestsFromMe;
             configuration.openGroupRequestsToMe = openGroupRequestsToMe;
+            configuration.ethereumWalletPath = ethereumWalletPath;
+            configuration.ethereumWalletPassword = ethereumWalletPassword;
             return configuration;
         }
     }
