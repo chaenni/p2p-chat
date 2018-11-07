@@ -21,10 +21,14 @@ public class EthereumAdapter {
     private final Web3j web3;
     private final Chat contract;
 
-    public EthereumAdapter(String walletJsonPath, String walletPassword) throws IOException, CipherException {
+    public EthereumAdapter(String walletJsonPath, String walletPassword) {
         web3 = Web3j.build(new HttpService(TEST_NET_ENDPOINT));
-        Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletJsonPath);
-        contract = Chat.load(CONTRACT_ADDRESS, web3, credentials, contractGasProvider(70_000, 1));
+        try {
+            Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletJsonPath);
+            contract = Chat.load(CONTRACT_ADDRESS, web3, credentials, contractGasProvider(70_000, 1));
+        } catch (IOException | CipherException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Observable<TransactionReceipt> sendMessage(byte[] hash) {
