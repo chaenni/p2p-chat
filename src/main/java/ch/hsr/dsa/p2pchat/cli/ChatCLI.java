@@ -61,7 +61,7 @@ public class ChatCLI {
     }
 
     private void displayCertifiedMessageReceived(CertifiedChatMessage certifiedChatMessage) {
-        var hash = certifiedChatMessage.getHash().toString();
+        var hash = new String(certifiedChatMessage.getHash());
         displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(certifiedChatMessage.getFromUser()),
             "You have received the following certified message. "
                 + "Do you want to reject or accept: "
