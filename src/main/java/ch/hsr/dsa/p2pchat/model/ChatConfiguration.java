@@ -13,8 +13,18 @@ public class ChatConfiguration implements Serializable {
     private Set<User> openFriendRequestsFromMe;
     private Set<User> openFriendRequestsToMe;
     private Map<String, GroupInvite> openGroupRequestsToMe; // GroupName
+    private String ethereumWalletPath;
+    private String ethereumWalletPassword;
 
     private ChatConfiguration() {
+    }
+
+    public String getEthereumWalletPath() {
+        return ethereumWalletPath;
+    }
+
+    public String getEthereumWalletPassword() {
+        return ethereumWalletPassword;
     }
 
     public User getOwnUser() {
