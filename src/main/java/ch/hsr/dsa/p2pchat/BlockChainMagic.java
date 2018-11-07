@@ -16,7 +16,7 @@ public class BlockChainMagic {
         Web3j web3 = Web3j.build(new HttpService("https://ropsten.infura.io/v3/3de592e69c4e4c579efad4f1138a5e9e"));
         Credentials credentials = WalletUtils.loadCredentials("nopassword",
             BlockChainMagic.class.getClassLoader().getResource("wallet1.json").getPath());
-        var contract = Chat.load("0x01a9bde0451A4EE5D681f2f8033e0601bb53cc76", web3, credentials,
+        var contract = Chat.load("0x6F3a6E2450C1DF6F044B98c5fF29a21D3082f8A9", web3, credentials,
             new ContractGasProvider() {
                 @Override
                 public BigInteger getGasPrice(String contractFunc) {
