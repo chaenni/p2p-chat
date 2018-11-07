@@ -29,6 +29,9 @@ public interface ChatHandler {
     Collection<FriendsListEntry> friendsList();
 
     void sendMessage(User toUser, String message);
+    void sendCertifiedMessage(User toUser, String message);
+    void acceptCertifiedMessage(byte[] hash);
+    void rejectCertifiedMessage(byte[] hash);
     void sendGroupMessage(Group group, String message);
     void sendFriendRequest(User user);
     boolean createGroup(String name);

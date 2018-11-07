@@ -256,6 +256,21 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
+    public void sendCertifiedMessage(User toUser, String message) {
+        //TODO
+    }
+
+    @Override
+    public void acceptCertifiedMessage(byte[] hash) {
+        //TODO
+    }
+
+    @Override
+    public void rejectCertifiedMessage(byte[] hash) {
+        //TODO
+    }
+
+    @Override
     public void sendGroupMessage(Group group, String message) {
         var groupMessage = new GroupMessage(configuration.getOwnUser(), message, group);
         var realGroup = getGroup(group.getName());

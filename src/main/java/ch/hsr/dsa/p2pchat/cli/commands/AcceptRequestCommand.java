@@ -35,6 +35,6 @@ public class AcceptRequestCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "user username || group groupname";
+        return "user <username> || group <groupname> || message <hash>";
     }
 }
