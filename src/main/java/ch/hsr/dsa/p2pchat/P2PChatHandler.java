@@ -11,6 +11,7 @@ import ch.hsr.dsa.p2pchat.model.GroupInvite;
 import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
 import ch.hsr.dsa.p2pchat.model.Message;
+import ch.hsr.dsa.p2pchat.model.MessageState;
 import ch.hsr.dsa.p2pchat.model.OnlineNotification;
 import ch.hsr.dsa.p2pchat.model.RejectFriendRequestMessage;
 import ch.hsr.dsa.p2pchat.model.User;
@@ -283,9 +284,8 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public BigInteger getCertifiedMessageState(byte[] hash) {
-        //TODO
-        return BigInteger.TWO;
+    public MessageState getCertifiedMessageState(byte[] hash) {
+        return MessageState.NOT_EXIST;
     }
 
     @Override

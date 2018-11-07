@@ -8,9 +8,9 @@ import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.GroupInvite;
 import ch.hsr.dsa.p2pchat.model.GroupMessage;
 import ch.hsr.dsa.p2pchat.model.LeaveMessage;
+import ch.hsr.dsa.p2pchat.model.MessageState;
 import ch.hsr.dsa.p2pchat.model.User;
 import io.reactivex.Observable;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -35,7 +35,7 @@ public interface ChatHandler {
     void sendCertifiedMessage(User toUser, String message);
     void acceptCertifiedMessage(byte[] hash);
     void rejectCertifiedMessage(byte[] hash);
-    BigInteger getCertifiedMessageState(byte[] hash);
+    MessageState getCertifiedMessageState(byte[] hash);
 
     void sendGroupMessage(Group group, String message);
     void sendFriendRequest(User user);
