@@ -8,13 +8,16 @@ import ch.hsr.dsa.p2pchat.cli.commands.Command;
 import ch.hsr.dsa.p2pchat.cli.commands.CreateGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendListCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.FriendRequestCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.GetCertifiedMessageStateCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.GetGroupInformationCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.HelpCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.InviteToGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.LeaveGroupCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.RejectRequestCommand;
+import ch.hsr.dsa.p2pchat.cli.commands.SendCertifiedMessageCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendGroupMessageCommand;
 import ch.hsr.dsa.p2pchat.cli.commands.SendMessageCommand;
+import ch.hsr.dsa.p2pchat.model.CertifiedChatMessage;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.GroupInvite;
@@ -40,7 +43,7 @@ public class ChatCLI {
     public ChatCLI(ChatHandler handler) {
         this.handler = handler;
         this.commands = new ArrayList<>();
-        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptRequestCommand(), new RejectRequestCommand(), new FriendListCommand(), new GetGroupInformationCommand());
+        Collections.addAll(commands, new CreateGroupCommand(), new FriendRequestCommand(), new InviteToGroupCommand(), new LeaveGroupCommand(), new SendGroupMessageCommand(), new SendMessageCommand(), new AcceptRequestCommand(), new RejectRequestCommand(), new FriendListCommand(), new SendCertifiedMessageCommand(), new GetCertifiedMessageStateCommand(), new GetGroupInformationCommand());
         commands.add(new HelpCommand(commands));
 
         handler.chatMessages().subscribe(this::displayMessage);
@@ -53,6 +56,12 @@ public class ChatCLI {
         handler.receivedGroupRequest().subscribe(this::displayGroupRequest);
         handler.errorMessages().subscribe(this::displaySystemMessage);
         handler.groupChatMessages().subscribe(this::displayGroupMessage);
+        handler.receivedCertifiedMessage().subscribe(this::displayCertifiedMessageReceived);
+
+    }
+
+    private void displayCertifiedMessageReceived(CertifiedChatMessage certifiedChatMessage) {
+        //TODO
     }
 
     private void displayGroupMessage(GroupMessage groupMessage) {

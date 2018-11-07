@@ -5,24 +5,24 @@ import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.User;
 import java.util.function.Consumer;
 
-public class SendCertifiedMessageCommand extends Command {
+public class GetCertifiedMessageStateCommand extends Command {
     @Override
     public String getName() {
-        return "sendCertified";
+        return "getCertifiedState";
     }
 
     @Override
     protected void onSuccess(ChatHandler handler, Consumer<String> systemMessage, String[] args) {
-        handler.sendCertifiedMessage(new User(args[0]), args[1]);
+        handler.getCertifiedMessageState(args[1].getBytes());
     }
 
     @Override
     protected int getNumberOfArguments() {
-        return 2;
+        return 1;
     }
 
     @Override
     public String getUsage() {
-        return "username message";
+        return "<hash>";
     }
 }

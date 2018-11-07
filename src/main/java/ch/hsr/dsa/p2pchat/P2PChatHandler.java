@@ -1,6 +1,7 @@
 package ch.hsr.dsa.p2pchat;
 
 import ch.hsr.dsa.p2pchat.model.AcceptFriendRequestMessage;
+import ch.hsr.dsa.p2pchat.model.CertifiedChatMessage;
 import ch.hsr.dsa.p2pchat.model.ChatConfiguration;
 import ch.hsr.dsa.p2pchat.model.ChatMessage;
 import ch.hsr.dsa.p2pchat.model.FriendRequest;
@@ -18,6 +19,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.time.temporal.ChronoUnit;
@@ -57,6 +59,7 @@ public class P2PChatHandler implements ChatHandler {
 
     private final Observable<User> friendRequestAccepted;
     private final Observable<User> friendRequestRejected;
+    private Observable<CertifiedChatMessage> certifiedMessageRequest;
 
     private final Map<User, FriendsListEntry> friends;
     private final Subject<String> errorMessages;
@@ -111,6 +114,10 @@ public class P2PChatHandler implements ChatHandler {
         chatMessages = messageReceived
             .filter(message -> message instanceof ChatMessage)
             .cast(ChatMessage.class);
+
+        certifiedMessageRequest = messageReceived
+            .filter(message -> message instanceof CertifiedChatMessage)
+            .cast(CertifiedChatMessage.class);
 
         friendCameOnline = messageReceived
             .filter(message -> message instanceof OnlineNotification)
@@ -241,6 +248,11 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
+    public Observable<CertifiedChatMessage> receivedCertifiedMessage() {
+        return certifiedMessageRequest;
+    }
+
+    @Override
     public Collection<FriendsListEntry> friendsList() {
         return friends.values();
     }
@@ -268,6 +280,12 @@ public class P2PChatHandler implements ChatHandler {
     @Override
     public void rejectCertifiedMessage(byte[] hash) {
         //TODO
+    }
+
+    @Override
+    public BigInteger getCertifiedMessageState(byte[] hash) {
+        //TODO
+        return BigInteger.TWO;
     }
 
     @Override

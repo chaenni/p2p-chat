@@ -23,6 +23,10 @@ public class AcceptRequestCommand extends Command {
                 handler.acceptGroupRequest(new Group(args[1]));
                 systemMessage.accept("Request accepted");
                 break;
+            case "message":
+                handler.acceptCertifiedMessage(args[1].getBytes());
+                systemMessage.accept("Request accepted");
+                break;
             default:
                 printUsage(systemMessage);
         }

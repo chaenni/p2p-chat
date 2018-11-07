@@ -23,6 +23,10 @@ public class RejectRequestCommand extends Command {
                 handler.rejectGroupRequest(new Group(args[1]));
                 systemMessage.accept("Request Rejected");
                 break;
+            case "message":
+                handler.rejectCertifiedMessage(args[1].getBytes());
+                systemMessage.accept("Request Rejected");
+                break;
             default:
                 printUsage(systemMessage);
         }
@@ -35,6 +39,6 @@ public class RejectRequestCommand extends Command {
 
     @Override
     public String getUsage() {
-        return "user username || group groupname";
+        return "user <username> || group <groupname> || message <hash>";
     }
 }
