@@ -89,7 +89,7 @@ public class P2PChatHandler implements ChatHandler {
         throws IOException {
         this.configuration = configuration;
 
-        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPassword(), configuration.getEthereumWalletPath());
+        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(), configuration.getEthereumWalletPassword());
 
         var port = findFreePort();
         this.friends = configuration.getFriends().stream()

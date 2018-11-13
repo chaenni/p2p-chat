@@ -101,7 +101,7 @@ public class ChatConfiguration implements Serializable {
         }
 
         public Builder setEthereumWalletPassword(String password) {
-            this.ethereumWalletPath = password;
+            this.ethereumWalletPassword = password;
             return this;
         }
 
