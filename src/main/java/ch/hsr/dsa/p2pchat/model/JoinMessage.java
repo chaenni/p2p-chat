@@ -10,4 +10,11 @@ public class JoinMessage implements Message {
     public User getUser() {
         return user;
     }
+
+    @Override
+    public String toString() {
+        return "JoinMessage{" +
+            "user=" + user +
+            '}';
+    }
 }

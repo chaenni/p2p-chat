@@ -10,4 +10,11 @@ public class RejectFriendRequestMessage implements Message {
     public User getFromUser() {
         return fromUser;
     }
+
+    @Override
+    public String toString() {
+        return "RejectFriendRequestMessage{" +
+            "fromUser=" + fromUser +
+            '}';
+    }
 }

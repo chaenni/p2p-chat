@@ -55,4 +55,13 @@ public class FriendsListEntry {
     private long timeSinceLastOnlineNotification(TemporalUnit temporalUnit) {
         return lastOnlineNotificationTimestamp.until(LocalDateTime.now(), temporalUnit);
     }
+
+    @Override
+    public String toString() {
+        return "FriendsListEntry{" +
+            "friend=" + friend +
+            ", isOnline=" + isOnline +
+            ", lastOnlineNotificationTimestamp=" + lastOnlineNotificationTimestamp +
+            '}';
+    }
 }

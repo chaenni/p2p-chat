@@ -16,4 +16,12 @@ public class LeaveMessage implements Message {
     public Group getGroup() {
         return group;
     }
+
+    @Override
+    public String toString() {
+        return "LeaveMessage{" +
+            "user=" + user +
+            ", group=" + group +
+            '}';
+    }
 }

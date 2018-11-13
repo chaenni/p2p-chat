@@ -10,4 +10,11 @@ public class OnlineNotification implements Message  {
     public User getUser() {
         return user;
     }
+
+    @Override
+    public String toString() {
+        return "OnlineNotification{" +
+            "user=" + user +
+            '}';
+    }
 }

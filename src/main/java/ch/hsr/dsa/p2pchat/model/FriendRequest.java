@@ -29,4 +29,11 @@ public class FriendRequest implements Message {
     public int hashCode() {
         return Objects.hash(fromUser);
     }
+
+    @Override
+    public String toString() {
+        return "FriendRequest{" +
+            "fromUser=" + fromUser +
+            '}';
+    }
 }

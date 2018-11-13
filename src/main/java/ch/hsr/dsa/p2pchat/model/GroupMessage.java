@@ -18,8 +18,16 @@ public class GroupMessage implements Message {
         return message;
     }
 
-
     public Group getGroup() {
         return group;
+    }
+
+    @Override
+    public String toString() {
+        return "GroupMessage{" +
+            "group=" + group +
+            ", fromUser=" + fromUser +
+            ", message='" + message + '\'' +
+            '}';
     }
 }

@@ -14,4 +14,11 @@ public class GroupInvite implements Message {
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
+
+    @Override
+    public String toString() {
+        return "GroupInvite{" +
+            "groupName='" + groupName + '\'' +
+            '}';
+    }
 }

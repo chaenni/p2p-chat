@@ -11,4 +11,10 @@ public class AcceptFriendRequestMessage implements Message {
         return fromUser;
     }
 
+    @Override
+    public String toString() {
+        return "AcceptFriendRequestMessage{" +
+            "fromUser=" + fromUser +
+            '}';
+    }
 }
