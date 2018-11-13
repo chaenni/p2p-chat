@@ -7,8 +7,12 @@
  1. once the chat is running type /help to get a list of available commands
  1. Happy chatting
 
+## How to Generate a Wallet?
+1. To be able to store data in the ethereum blockchain, a wallet file is required. Follow these instructions to generate one: https://docs.web3j.io/command_line.html#wallet-tools
+1. Transfer ethers to your wallet e.g. using Metamask
+1. When using Metamask, you can get ethers here https://faucet.metamask.io/  
 
-## How to change contract
+## How to change contract?
 1. Copy changed contract from src/main/resources/Chat.sol to remix IDE
 1. Click deploy
 1. Click on the etherscan link displayed on bottom panel of remix
