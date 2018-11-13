@@ -134,10 +134,15 @@ public class ChatCLI {
             Scanner scanner = new Scanner(System.in);
             while (scanner.hasNext()) {
                 String nextEntry = scanner.nextLine();
-                if (nextEntry.charAt(0) == '/') {
-                    handleCommandInput(nextEntry);
-                } else {
-                    displayMessage(new ChatMessage(new User("User"), nextEntry));
+                try {
+                    if (nextEntry.charAt(0) == '/') {
+                        handleCommandInput(nextEntry);
+                    } else {
+                        displayMessage(new ChatMessage(new User("User"), nextEntry));
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    displaySystemMessage("Continue");
                 }
             }
         });
