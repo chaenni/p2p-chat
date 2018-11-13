@@ -36,6 +36,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.tomp2p.dht.PeerBuilderDHT;
 import net.tomp2p.dht.PeerDHT;
+import net.tomp2p.futures.BaseFuture;
+import net.tomp2p.futures.BaseFutureListener;
 import net.tomp2p.p2p.Peer;
 import net.tomp2p.p2p.PeerBuilder;
 import net.tomp2p.p2p.builder.BootstrapBuilder;
@@ -88,9 +90,6 @@ public class P2PChatHandler implements ChatHandler {
         throws IOException {
         this.configuration = configuration;
 
-        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(),
-            configuration.getEthereumWalletPassword());
-
         var port = findFreePort();
         this.friends = configuration.getFriends().stream()
             .collect(Collectors.toMap(friend -> friend, FriendsListEntry::new));
@@ -108,6 +107,10 @@ public class P2PChatHandler implements ChatHandler {
         }
 
         storeOwnAddressInDHT();
+
+        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(),
+            configuration.getEthereumWalletPassword());
+
 
         var messageReceived = Observable.create(emitter -> {
             peer.peer().objectDataReply((sender, request) -> {
@@ -453,7 +456,22 @@ public class P2PChatHandler implements ChatHandler {
         peer.put(Number160.createHash(configuration.getOwnUser().getName()))
             .object(peer.peer().peerAddress())
             .start()
-            .awaitUninterruptibly();
+            .awaitUninterruptibly().addListener(new BaseFutureListener<BaseFuture>() {
+                @Override
+                public void operationComplete(BaseFuture future) throws Exception {
+                    if(future.isSuccess()) System.out.println("Success: data stored in dht");
+                    else  {
+                        System.out.println("Not Success: data stored in dht" +  future.failedReason());
+                    }
+
+                }
+
+                @Override
+                public void exceptionCaught(Throwable t) throws Exception {
+                    System.out.println("ERROR: Could not connect to the DHT");
+                    System.exit(1);
+                }
+        });
     }
 
     private void removeOwnAddressFromDHT() {
