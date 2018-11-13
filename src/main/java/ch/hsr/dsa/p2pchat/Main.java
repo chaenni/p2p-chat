@@ -55,6 +55,7 @@ public class Main {
         ChatHandler finalChatHandler = chatHandler;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
+                chat.stop();
                 ConfigHandler.storeConfiguration(finalChatHandler.getConfiguration());
             } catch (Throwable e) {
                 e.printStackTrace();

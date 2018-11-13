@@ -35,7 +35,7 @@ public interface ChatHandler {
     void sendCertifiedMessage(User toUser, String message);
     void acceptCertifiedMessage(byte[] hash);
     void rejectCertifiedMessage(byte[] hash);
-    MessageState getCertifiedMessageState(byte[] hash);
+    Observable<MessageState> getCertifiedMessageState(byte[] hash);
 
     void sendGroupMessage(Group group, String message);
     void sendFriendRequest(User user);

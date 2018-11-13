@@ -3,6 +3,7 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
+import java.util.Base64;
 import java.util.function.Consumer;
 
 public class RejectRequestCommand extends Command {
@@ -24,7 +25,7 @@ public class RejectRequestCommand extends Command {
                 systemMessage.accept("Request Rejected");
                 break;
             case "message":
-                handler.rejectCertifiedMessage(args[1].getBytes());
+                handler.rejectCertifiedMessage(Base64.getDecoder().decode(args[1]));
                 systemMessage.accept("Request Rejected");
                 break;
             default:

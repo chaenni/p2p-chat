@@ -202,6 +202,7 @@ public class P2PChatHandler implements ChatHandler {
         removeOwnAddressFromDHT();
         disposables.forEach(Disposable::dispose);
         peer.shutdown();
+        ethereumAdapter.shutdown();
     }
 
     @Override
@@ -282,27 +283,28 @@ public class P2PChatHandler implements ChatHandler {
                 message +
                 System.currentTimeMillis());
 
-        ethereumAdapter.sendMessage(hash).
-            subscribe(i -> {
-                var certifiedMessage = new CertifiedChatMessage(configuration.getOwnUser(), message, hash);
-                sendMessage(toUser, certifiedMessage);
-                systemMessages.onNext("Sent certified message with hash " + certifiedMessage.getBase64Hash());
-            });
+        ethereumAdapter.sendMessage(hash).subscribe(i -> {
+            var certifiedMessage = new CertifiedChatMessage(configuration.getOwnUser(), message, hash);
+            sendMessage(toUser, certifiedMessage);
+            systemMessages.onNext("Sent certified message with hash " + certifiedMessage.getBase64Hash());
+        });
     }
 
     @Override
     public void acceptCertifiedMessage(byte[] hash) {
-        ethereumAdapter.acceptMessage(hash);
+        ethereumAdapter.acceptMessage(hash).subscribe(ignore ->
+            systemMessages.onNext("Message accepted successfully."));
     }
 
     @Override
     public void rejectCertifiedMessage(byte[] hash) {
-        ethereumAdapter.rejectMessage(hash);
+        ethereumAdapter.rejectMessage(hash).subscribe(ignore ->
+            systemMessages.onNext("Message rejected successfully."));
     }
 
     @Override
-    public MessageState getCertifiedMessageState(byte[] hash) {
-        return MessageState.NOT_EXIST;
+    public Observable<MessageState> getCertifiedMessageState(byte[] hash) {
+        return ethereumAdapter.getMessageState(hash);
     }
 
     @Override

@@ -1,6 +1,9 @@
 package ch.hsr.dsa.p2pchat;
 
 import ch.hsr.dsa.p2pchat.contractadapter.Chat;
+import ch.hsr.dsa.p2pchat.model.MessageState;
+import hu.akarnokd.rxjava.interop.RxJavaInterop;
+import io.reactivex.Observable;
 import java.io.IOException;
 import java.math.BigInteger;
 import org.web3j.crypto.CipherException;
@@ -10,7 +13,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
-import rx.Observable;
 
 public class EthereumAdapter {
 
@@ -30,33 +32,22 @@ public class EthereumAdapter {
     }
 
     public Observable<TransactionReceipt> sendMessage(byte[] hash) {
-        return contract.sendMessage(hash).observable();
+        return RxJavaInterop.toV2Observable(contract.sendMessage(hash).observable());
     }
 
     public Observable<TransactionReceipt> acceptMessage(byte[] hash) {
-        return contract.acceptMessage(hash).observable();
+        return RxJavaInterop.toV2Observable(contract.acceptMessage(hash).observable());
     }
 
     public Observable<TransactionReceipt> rejectMessage(byte[] hash) {
-        return contract.rejectMessage(hash).observable();
+        return RxJavaInterop.toV2Observable(contract.rejectMessage(hash).observable());
     }
 
-    public Observable<Boolean> isSent(byte[] hash) {
-        return contract.getMessageState(hash)
+    public Observable<MessageState> getMessageState(byte[] hash) {
+        return RxJavaInterop.toV2Observable(contract.getMessageState(hash)
             .observable()
-            .map(i -> i.intValue() > 0);
-    }
+            .map(index -> MessageState.values()[index.intValue()]));
 
-    public Observable<Boolean> isAccepted(byte[] hash) {
-        return contract.getMessageState(hash)
-            .observable()
-            .map(i -> i.intValue() == 2);
-    }
-
-    public Observable<Boolean> isRejected(byte[] hash) {
-        return contract.getMessageState(hash)
-            .observable()
-            .map(i -> i.intValue() == 3);
     }
 
     public void shutdown() {

@@ -26,7 +26,6 @@ public class AcceptRequestCommand extends Command {
                 break;
             case "message":
                 handler.acceptCertifiedMessage(Base64.getDecoder().decode(args[1]));
-                systemMessage.accept("Request accepted");
                 break;
             default:
                 printUsage(systemMessage);
