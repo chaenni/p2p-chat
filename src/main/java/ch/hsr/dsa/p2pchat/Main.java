@@ -7,6 +7,7 @@ import java.net.Inet4Address;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+import org.slf4j.MDC;
 
 public class Main {
 
@@ -33,6 +34,8 @@ public class Main {
                 .setEthereumWalletPassword(password)
                 .build();
         });
+
+        MDC.put("user", config.getOwnUser().getName());
 
         System.out.println(config.getOwnUser().getName() + ", Do you want to create your own chat network? [y(es)/n(o)]");
         P2PChatHandler chatHandler;
