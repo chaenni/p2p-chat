@@ -35,7 +35,7 @@ public class Main {
         });
 
         System.out.println(config.getOwnUser().getName() + ", Do you want to create your own chat network? [y(es)/n(o)]");
-        ChatHandler chatHandler;
+        P2PChatHandler chatHandler;
 
         if(input.next().startsWith("y")) {
             chatHandler = P2PChatHandler.start(config);
@@ -56,6 +56,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 chat.stop();
+                chatHandler.stop();
                 ConfigHandler.storeConfiguration(finalChatHandler.getConfiguration());
             } catch (Throwable e) {
                 e.printStackTrace();

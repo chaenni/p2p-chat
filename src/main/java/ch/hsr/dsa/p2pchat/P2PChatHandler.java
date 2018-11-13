@@ -44,12 +44,15 @@ import net.tomp2p.p2p.builder.BootstrapBuilder;
 import net.tomp2p.peers.Number160;
 import net.tomp2p.peers.PeerAddress;
 import net.tomp2p.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class P2PChatHandler implements ChatHandler {
 
     private static final String GROUP_PREFIX = "Group: ";
     private static final long ONLINE_NOTIFICATION_INTERVAL_S = 10;
     private static final long OFFLINE_TIMEOUT_S = 3 * ONLINE_NOTIFICATION_INTERVAL_S;
+    private final Logger logger = LoggerFactory.getLogger(P2PChatHandler.class);
 
     private final PeerDHT peer;
     private final EthereumAdapter ethereumAdapter;
@@ -94,15 +97,18 @@ public class P2PChatHandler implements ChatHandler {
         this.friends = configuration.getFriends().stream()
             .collect(Collectors.toMap(friend -> friend, FriendsListEntry::new));
 
+        systemMessages = PublishSubject.create();
+
         peer = new PeerBuilderDHT(new PeerBuilder(Number160.createHash(configuration.getOwnUser().getName()))
             .ports(port).start()).start();
-        System.out.println("Chat running on " + peer.peer().peerAddress().inetAddress() + ":" + port);
+
+        systemMessages.onNext("Chat running on " + peer.peer().peerAddress().inetAddress() + ":" + port);
 
         if (bootstrapper != null) {
             try {
                 bootstrapper.apply(peer.peer()).start().awaitListeners();
             } catch (InterruptedException e) {
-                System.err.println("Bootstrapping failed.");
+                logger.error("Bootstrapping failed.", e);
             }
         }
 
@@ -111,11 +117,13 @@ public class P2PChatHandler implements ChatHandler {
         this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(),
             configuration.getEthereumWalletPassword());
 
-
         var messageReceived = Observable.create(emitter -> {
             peer.peer().objectDataReply((sender, request) -> {
                 if (request instanceof Message) {
+                    logger.info("Received message: " + request);
                     emitter.onNext(request);
+                } else {
+                    logger.info("Received message with unhandled type: " + request);
                 }
                 return null;
             });
@@ -181,8 +189,6 @@ public class P2PChatHandler implements ChatHandler {
             .filter(configuration.getOpenFriendRequestsFromMe()::contains)
             .doOnNext(configuration.getOpenFriendRequestsFromMe()::remove);
 
-        systemMessages = PublishSubject.create();
-
         friendWentOffline = Observable
             .interval(OFFLINE_TIMEOUT_S, TimeUnit.SECONDS)
             .flatMap(time -> Observable.fromIterable(friendsList()))
@@ -202,6 +208,7 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     public void stop() {
+        logger.info("Stopping down chat handler.");
         removeOwnAddressFromDHT();
         disposables.forEach(Disposable::dispose);
         peer.shutdown();
@@ -440,14 +447,22 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     private void sendMessage(User toUser, Message message) {
-        Runnable userNotFound = () -> systemMessages.onNext("Peer address for user not found");
+        Runnable userNotFound = () -> {
+            systemMessages.onNext("Peer address for user not found");
+            logger.error("User " + toUser.getName() + " not found.");
+        };
+
         try {
             getPeerAddressForUser(toUser)
                 .ifPresentOrElse(
-                    address -> peer.peer().sendDirect(address).object(message).start(),
+                    address -> {
+                        peer.peer().sendDirect(address).object(message).start();
+                        logger.info("Sent message " + message + " to user " + toUser.getName() + ".");
+                    },
                     userNotFound);
 
         } catch (IOException | ClassNotFoundException e) {
+            logger.error("Error while sending message to user " + toUser.getName(), e);
             userNotFound.run();
         }
     }
@@ -456,29 +471,17 @@ public class P2PChatHandler implements ChatHandler {
         peer.put(Number160.createHash(configuration.getOwnUser().getName()))
             .object(peer.peer().peerAddress())
             .start()
-            .awaitUninterruptibly().addListener(new BaseFutureListener<BaseFuture>() {
-                @Override
-                public void operationComplete(BaseFuture future) throws Exception {
-                    if(future.isSuccess()) System.out.println("Success: data stored in dht");
-                    else  {
-                        System.out.println("Not Success: data stored in dht" +  future.failedReason());
-                    }
-
-                }
-
-                @Override
-                public void exceptionCaught(Throwable t) throws Exception {
-                    System.out.println("ERROR: Could not connect to the DHT");
-                    System.exit(1);
-                }
-        });
+            .awaitUninterruptibly().addListener(loggerListener("Successfully stored own address in DHT.",
+            "Failed to store own address in DHT."));
     }
 
     private void removeOwnAddressFromDHT() {
         peer.remove(Number160.createHash(configuration.getOwnUser().getName()))
             .all()
             .start()
-            .awaitUninterruptibly();
+            .awaitUninterruptibly()
+            .addListener(loggerListener("Successfully removed own address from DHT.",
+                "Failed to remove own address from DHT."));
     }
 
     private Optional<Group> getGroup(String name) {
@@ -499,6 +502,27 @@ public class P2PChatHandler implements ChatHandler {
             object(group)
             .start()
             .awaitUninterruptibly();
+
+    }
+
+    private BaseFutureListener<BaseFuture> loggerListener(String messageSuccess, String messageFail) {
+        return new BaseFutureListener<>() {
+            @Override
+            public void operationComplete(BaseFuture future) {
+                if (future.isSuccess()) {
+                    logger.info(messageSuccess);
+                } else {
+                    logger.error(messageFail);
+                }
+
+            }
+
+            @Override
+            public void exceptionCaught(Throwable t) {
+                logger.error(messageFail, t);
+                System.exit(1);
+            }
+        };
     }
 
     private boolean isFriendOf(User user) {
@@ -516,4 +540,5 @@ public class P2PChatHandler implements ChatHandler {
             throw new RuntimeException(e);
         }
     }
+
 }
