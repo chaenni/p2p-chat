@@ -20,7 +20,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.security.MessageDigest;
@@ -67,7 +66,7 @@ public class P2PChatHandler implements ChatHandler {
     private Observable<CertifiedChatMessage> certifiedMessageRequest;
 
     private final Map<User, FriendsListEntry> friends;
-    private final Subject<String> errorMessages;
+    private final Subject<String> systemMessages;
     private final List<Disposable> disposables = new ArrayList<>();
     private final Observable<User> friendWentOffline;
 
@@ -89,7 +88,8 @@ public class P2PChatHandler implements ChatHandler {
         throws IOException {
         this.configuration = configuration;
 
-        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(), configuration.getEthereumWalletPassword());
+        this.ethereumAdapter = new EthereumAdapter(configuration.getEthereumWalletPath(),
+            configuration.getEthereumWalletPassword());
 
         var port = findFreePort();
         this.friends = configuration.getFriends().stream()
@@ -178,15 +178,15 @@ public class P2PChatHandler implements ChatHandler {
             .filter(configuration.getOpenFriendRequestsFromMe()::contains)
             .doOnNext(configuration.getOpenFriendRequestsFromMe()::remove);
 
-        errorMessages = PublishSubject.create();
+        systemMessages = PublishSubject.create();
 
         friendWentOffline = Observable
-                .interval(OFFLINE_TIMEOUT_S, TimeUnit.SECONDS)
-                .flatMap(time -> Observable.fromIterable(friendsList()))
-                .filter(FriendsListEntry::isOnline)
-                .filter(friend -> !friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
-                .map(FriendsListEntry::getFriend)
-                .doOnNext(friend -> friends.get(friend).setOnline(false));
+            .interval(OFFLINE_TIMEOUT_S, TimeUnit.SECONDS)
+            .flatMap(time -> Observable.fromIterable(friendsList()))
+            .filter(FriendsListEntry::isOnline)
+            .filter(friend -> !friend.receivedOnlineNotificationsSince(ChronoUnit.SECONDS, OFFLINE_TIMEOUT_S))
+            .map(FriendsListEntry::getFriend)
+            .doOnNext(friend -> friends.get(friend).setOnline(false));
 
         disposables.add(Observable
             .interval(ONLINE_NOTIFICATION_INTERVAL_S, TimeUnit.SECONDS)
@@ -250,8 +250,8 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     @Override
-    public Observable<String> errorMessages() {
-        return errorMessages;
+    public Observable<String> systemMessage() {
+        return systemMessages;
     }
 
     @Override
@@ -269,7 +269,7 @@ public class P2PChatHandler implements ChatHandler {
         if (isFriendOf(toUser)) {
             sendMessage(toUser, new ChatMessage(configuration.getOwnUser(), message));
         } else {
-            errorMessages
+            systemMessages
                 .onNext("You can only send messages to friends and " + toUser.getName() + " is not your friend.");
         }
     }
@@ -283,9 +283,11 @@ public class P2PChatHandler implements ChatHandler {
                 System.currentTimeMillis());
 
         ethereumAdapter.sendMessage(hash).
-            subscribe( i ->
-                sendMessage(toUser,
-                    new CertifiedChatMessage(configuration.getOwnUser(), message, hash)));
+            subscribe(i -> {
+                var certifiedMessage = new CertifiedChatMessage(configuration.getOwnUser(), message, hash);
+                sendMessage(toUser, certifiedMessage);
+                systemMessages.onNext("Sent certified message with hash " + certifiedMessage.getBase64Hash());
+            });
     }
 
     @Override
@@ -307,19 +309,19 @@ public class P2PChatHandler implements ChatHandler {
     public void sendGroupMessage(Group group, String message) {
         var groupMessage = new GroupMessage(configuration.getOwnUser(), message, group);
         var realGroup = getGroup(group.getName());
-        if(realGroup.isPresent()) {
+        if (realGroup.isPresent()) {
             realGroup.get().getMembers().stream()
                 .filter(member -> !member.equals(configuration.getOwnUser()))
                 .forEach(member -> sendMessage(member, groupMessage));
         } else {
-            errorMessages.onNext("Could not send message to group \""+group.getName()+"\"");
+            systemMessages.onNext("Could not send message to group \"" + group.getName() + "\"");
         }
     }
 
     @Override
     public void sendFriendRequest(User user) {
         if (isFriendOf(user)) {
-            errorMessages.onNext(user.getName() + " is already your friend.");
+            systemMessages.onNext(user.getName() + " is already your friend.");
         } else {
             configuration.getOpenFriendRequestsFromMe().add(user);
             sendMessage(user, new FriendRequest(configuration.getOwnUser()));
@@ -388,7 +390,7 @@ public class P2PChatHandler implements ChatHandler {
 
     @Override
     public void acceptGroupRequest(Group group) {
-        if(configuration.hasGroupInviteToGroup(group)) {
+        if (configuration.hasGroupInviteToGroup(group)) {
             addUserToGroup(group, configuration.getOwnUser());
         }
     }
@@ -433,7 +435,7 @@ public class P2PChatHandler implements ChatHandler {
     }
 
     private void sendMessage(User toUser, Message message) {
-        Runnable userNotFound = () -> errorMessages.onNext("Peer address for user not found");
+        Runnable userNotFound = () -> systemMessages.onNext("Peer address for user not found");
         try {
             getPeerAddressForUser(toUser)
                 .ifPresentOrElse(

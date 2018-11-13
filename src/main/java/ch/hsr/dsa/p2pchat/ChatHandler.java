@@ -26,7 +26,7 @@ public interface ChatHandler {
     Observable<User> friendRequestAccepted();
     Observable<User> friendRequestRejected();
     Observable<GroupInvite> receivedGroupRequest();
-    Observable<String> errorMessages();
+    Observable<String> systemMessage();
     Observable<CertifiedChatMessage> receivedCertifiedMessage();
 
     Collection<FriendsListEntry> friendsList();

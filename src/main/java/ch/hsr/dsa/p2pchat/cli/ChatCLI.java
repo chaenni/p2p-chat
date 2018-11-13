@@ -54,14 +54,14 @@ public class ChatCLI {
         handler.friendRequestAccepted().subscribe(this::displayFriendRequestAccepted);
         handler.friendRequestRejected().subscribe(this::displayFriendRequestRejected);
         handler.receivedGroupRequest().subscribe(this::displayGroupRequest);
-        handler.errorMessages().subscribe(this::displaySystemMessage);
+        handler.systemMessage().subscribe(this::displaySystemMessage);
         handler.groupChatMessages().subscribe(this::displayGroupMessage);
         handler.receivedCertifiedMessage().subscribe(this::displayCertifiedMessageReceived);
 
     }
 
     private void displayCertifiedMessageReceived(CertifiedChatMessage certifiedChatMessage) {
-        var hash = new String(certifiedChatMessage.getHash());
+        var hash = certifiedChatMessage.getBase64Hash();
         displayMessage(AnsiColor.BLUE, Optional.empty(), Optional.of(certifiedChatMessage.getFromUser()),
             "You have received the following certified message. "
                 + "Do you want to reject or accept: "

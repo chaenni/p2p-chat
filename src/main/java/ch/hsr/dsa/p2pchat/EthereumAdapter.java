@@ -3,8 +3,6 @@ package ch.hsr.dsa.p2pchat;
 import ch.hsr.dsa.p2pchat.contractadapter.Chat;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;

@@ -1,15 +1,17 @@
 package ch.hsr.dsa.p2pchat.model;
 
+import java.util.Base64;
+
 public class CertifiedChatMessage implements Message {
 
     private User fromUser;
     private String message;
-    private final byte[] hash;
+    private final String base64Hash;
 
     public CertifiedChatMessage(User fromUser, String message, byte[] hash) {
         this.fromUser = fromUser;
         this.message = message;
-        this.hash = hash;
+        this.base64Hash = Base64.getEncoder().encodeToString(hash);
     }
 
     public User getFromUser() {
@@ -28,7 +30,11 @@ public class CertifiedChatMessage implements Message {
             '}';
     }
 
+    public String getBase64Hash() {
+        return base64Hash;
+    }
+
     public byte[] getHash() {
-        return hash;
+        return Base64.getDecoder().decode(base64Hash);
     }
 }

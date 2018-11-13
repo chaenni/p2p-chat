@@ -3,6 +3,7 @@ package ch.hsr.dsa.p2pchat.cli.commands;
 import ch.hsr.dsa.p2pchat.ChatHandler;
 import ch.hsr.dsa.p2pchat.model.Group;
 import ch.hsr.dsa.p2pchat.model.User;
+import java.util.Base64;
 import java.util.function.Consumer;
 
 public class AcceptRequestCommand extends Command {
@@ -24,7 +25,7 @@ public class AcceptRequestCommand extends Command {
                 systemMessage.accept("Request accepted");
                 break;
             case "message":
-                handler.acceptCertifiedMessage(args[1].getBytes());
+                handler.acceptCertifiedMessage(Base64.getDecoder().decode(args[1]));
                 systemMessage.accept("Request accepted");
                 break;
             default:
