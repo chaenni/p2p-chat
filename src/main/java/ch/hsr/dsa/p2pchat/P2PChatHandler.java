@@ -322,7 +322,7 @@ public class P2PChatHandler implements ChatHandler {
     public void sendGroupMessage(Group group, String message) {
         var groupMessage = new GroupMessage(configuration.getOwnUser(), message, group);
         var realGroup = getGroup(group.getName());
-        if (realGroup.isPresent()) {
+        if (realGroup.isPresent() && realGroup.get().getMembers().contains(configuration.getOwnUser())) {
             realGroup.get().getMembers().stream()
                 .filter(member -> !member.equals(configuration.getOwnUser()))
                 .forEach(member -> sendMessage(member, groupMessage));
