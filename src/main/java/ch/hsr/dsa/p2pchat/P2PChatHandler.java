@@ -204,7 +204,7 @@ public class P2PChatHandler implements ChatHandler {
                 var onlineNotification = new OnlineNotification(configuration.getOwnUser());
                 friendsList().stream()
                     .map(FriendsListEntry::getFriend)
-                    .forEach(friend -> sendMessage(friend, onlineNotification));
+                    .forEach(friend -> sendMessageSilent(friend, onlineNotification));
             }));
     }
 
@@ -447,11 +447,23 @@ public class P2PChatHandler implements ChatHandler {
         return data == null ? Optional.empty() : Optional.of((PeerAddress) data.object());
     }
 
+    private void sendMessageSilent(User toUser, Message message) {
+        Runnable userNotFound = () ->
+            logger.error("User " + toUser.getName() + " not found.");
+
+        sendMessage(toUser, message, userNotFound);
+    }
+
     private void sendMessage(User toUser, Message message) {
         Runnable userNotFound = () -> {
             systemMessages.onNext("Peer address for user not found");
             logger.error("User " + toUser.getName() + " not found.");
         };
+
+        sendMessage(toUser, message, userNotFound);
+    }
+
+    private void sendMessage(User toUser, Message message, Runnable userNotFound) {
 
         try {
             getPeerAddressForUser(toUser)
