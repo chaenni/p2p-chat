@@ -21,11 +21,13 @@ public class EthereumAdapter {
     private final Web3j web3;
     private final Chat contract;
 
+    private static final int GWEI = 1_000_000_000;
+
     public EthereumAdapter(String walletJsonPath, String walletPassword) {
         web3 = Web3j.build(new HttpService(TEST_NET_ENDPOINT));
         try {
             Credentials credentials = WalletUtils.loadCredentials(walletPassword, walletJsonPath);
-            contract = Chat.load(CONTRACT_ADDRESS, web3, credentials, contractGasProvider(70_000, 1));
+            contract = Chat.load(CONTRACT_ADDRESS, web3, credentials, contractGasProvider(100_000, GWEI));
         } catch (IOException | CipherException e) {
             throw new RuntimeException(e);
         }
